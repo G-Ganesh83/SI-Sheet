@@ -1,5 +1,7 @@
 import React from "react";
 import { Analytics } from "@vercel/analytics/react";
+import { AuthProvider } from "./context/AuthContext";
+import { useAuth } from "./context/useAuth";
 import { TrackerProvider } from "./context/TrackerContext";
 import { useTracker } from "./context/useTracker";
 import { AppLayout } from "./components/layout/AppLayout";
@@ -9,6 +11,8 @@ import { TopicsView } from "./components/topics/TopicsView";
 import { LabsView } from "./components/labs/LabsView";
 import { RevisionView } from "./components/revision/RevisionView";
 import { ImportView } from "./components/import/ImportView";
+import { LoginView } from "./components/auth/LoginView";
+import { LoadingScreen } from "./components/auth/LoadingScreen";
 
 const AppContent: React.FC = () => {
   const { activeTab } = useTracker();
@@ -38,13 +42,31 @@ const AppContent: React.FC = () => {
   );
 };
 
-export default function App() {
+const ProtectedApp: React.FC = () => {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  if (!user) {
+    return <LoginView />;
+  }
+
   return (
     <TrackerProvider>
       <AppLayout>
         <AppContent />
       </AppLayout>
-      <Analytics />
     </TrackerProvider>
+  );
+};
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <ProtectedApp />
+      <Analytics />
+    </AuthProvider>
   );
 }

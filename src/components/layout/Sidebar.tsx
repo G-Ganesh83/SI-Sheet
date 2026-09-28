@@ -1,5 +1,6 @@
 import React from "react";
 import { useTracker } from "../../context/useTracker";
+import { useAuth } from "../../context/useAuth";
 import type { ViewTab } from "../../types/tracker";
 import {
   LayoutDashboard,
@@ -13,6 +14,7 @@ import {
   Terminal,
   RotateCw,
   Upload,
+  LogOut,
 } from "lucide-react";
 
 export const Sidebar: React.FC = () => {
@@ -26,6 +28,7 @@ export const Sidebar: React.FC = () => {
     exportData,
     resetAllProgress,
   } = useTracker();
+  const { user, profile, signOut } = useAuth();
 
   const navItems: { id: ViewTab; label: string; icon: React.ReactNode; badge?: number | string }[] = [
     {
@@ -99,6 +102,35 @@ export const Sidebar: React.FC = () => {
           );
         })}
       </nav>
+
+      {user && (
+        <div className="sidebar-user">
+          <div className="sidebar-user-avatar">
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt={profile.display_name || "User"} />
+            ) : (
+              <span>{(profile?.display_name || user.email || "U").charAt(0).toUpperCase()}</span>
+            )}
+          </div>
+          <div className="sidebar-user-info">
+            <span className="sidebar-user-name">
+              {profile?.display_name || user.email?.split("@")[0] || "User"}
+            </span>
+            <span className="sidebar-user-email" title={user.email}>
+              {user.email}
+            </span>
+          </div>
+          <button
+            type="button"
+            className="btn-icon sidebar-user-logout"
+            onClick={signOut}
+            title="Sign out"
+            aria-label="Sign out"
+          >
+            <LogOut size={14} />
+          </button>
+        </div>
+      )}
 
       <div className="sidebar-footer">
         <div style={{ display: "flex", gap: 4 }}>

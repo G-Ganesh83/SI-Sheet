@@ -1,5 +1,6 @@
 import React from "react";
 import { useTracker } from "../../context/useTracker";
+import { useAuth } from "../../context/useAuth";
 import { Sidebar } from "./Sidebar";
 import { ProblemDrawer } from "../common/ProblemDrawer";
 import type { ViewTab } from "../../types/tracker";
@@ -13,10 +14,12 @@ import {
   Sun,
   Moon,
   Upload,
+  LogOut,
 } from "lucide-react";
 
 export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { activeTab, setActiveTab, theme, toggleTheme, revisionCount } = useTracker();
+  const { signOut } = useAuth();
 
   const mobileNavItems: { id: ViewTab; label: string; icon: React.ReactNode }[] = [
     { id: "dashboard", label: "Dashboard", icon: <LayoutDashboard size={17} /> },
@@ -42,14 +45,25 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
             </div>
             <span>SI Sheet</span>
           </div>
-          <button
-            type="button"
-            className="btn-icon"
-            onClick={toggleTheme}
-            aria-label="Toggle color theme"
-          >
-            {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <button
+              type="button"
+              className="btn-icon"
+              onClick={toggleTheme}
+              aria-label="Toggle color theme"
+            >
+              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+            <button
+              type="button"
+              className="btn-icon"
+              onClick={signOut}
+              title="Sign out"
+              aria-label="Sign out"
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
         </header>
 
         {/* View Child Components */}
