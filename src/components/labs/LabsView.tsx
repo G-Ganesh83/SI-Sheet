@@ -35,7 +35,7 @@ export const LabsView: React.FC = () => {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
           gap: 10,
           marginBottom: 24,
         }}

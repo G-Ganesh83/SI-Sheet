@@ -646,6 +646,7 @@ a {
   padding: 0 10px 0 32px;
   font-size: 12.5px;
   color: var(--text-primary);
+  text-overflow: ellipsis;
   transition: border-color var(--transition-fast);
 }
 
@@ -1622,15 +1623,41 @@ input:disabled {
 
   .mobile-header {
     display: flex;
+    padding-top: env(safe-area-inset-top, 0px);
+    height: calc(48px + env(safe-area-inset-top, 0px));
   }
 
   .mobile-bottom-nav {
     display: flex;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    height: calc(54px + env(safe-area-inset-bottom, 0px));
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-nav-item {
+    min-height: 44px;
+    min-width: 48px;
+    padding: 6px 4px;
   }
 
   .view-container {
     padding: 12px;
     padding-bottom: 70px;
+  }
+
+  .view-title-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .btn-icon {
+    min-width: 30px;
+    min-height: 30px;
+  }
+
+  .drawer-body {
+    padding-bottom: max(24px, env(safe-area-inset-bottom, 24px));
   }
 
   .problem-table-container {
@@ -1741,9 +1768,31 @@ input:disabled {
   .import-tabs {
     width: 100%;
   }
-
   .import-tab {
     flex: 1;
+  }
+
+  .stats-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .notes-dialog {
+    max-width: 98vw;
+  }
+
+  .drawer-overlay {
+    align-items: flex-end;
+  }
+
+  .drawer-content {
+    max-width: 100%;
+    max-height: 92vh;
+    border-left: none;
+    border-top: 1px solid var(--border-default);
+    border-top-left-radius: var(--radius-md);
+    border-top-right-radius: var(--radius-md);
   }
 }
 

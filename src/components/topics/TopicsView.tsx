@@ -36,7 +36,7 @@ export const TopicsView: React.FC = () => {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
           gap: 10,
           marginBottom: 24,
         }}

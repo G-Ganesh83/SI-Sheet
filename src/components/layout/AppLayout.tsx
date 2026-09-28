@@ -75,15 +75,29 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
               {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
             </button>
             {user ? (
-              <button
-                type="button"
-                className="btn-icon"
-                onClick={signOut}
-                title="Sign out"
-                aria-label="Sign out"
-              >
-                <LogOut size={16} />
-              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <div
+                  className="sidebar-user-avatar"
+                  style={{ width: 22, height: 22, fontSize: 10 }}
+                  title={user.email || profile?.display_name || "Signed in"}
+                  aria-label={user.email || profile?.display_name || "Signed in"}
+                >
+                  {profile?.avatar_url ? (
+                    <img src={profile.avatar_url} alt={profile.display_name || "User"} />
+                  ) : (
+                    <span>{(profile?.display_name || user.email || "U").charAt(0).toUpperCase()}</span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  className="btn-icon"
+                  onClick={signOut}
+                  title="Sign out"
+                  aria-label="Sign out"
+                >
+                  <LogOut size={16} />
+                </button>
+              </div>
             ) : (
               <button
                 type="button"
