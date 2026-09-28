@@ -160,14 +160,22 @@ serve(async (req: Request) => {
 
       const role = userProf?.role || "user";
 
+      // Explicitly extract Auth fields — email and last_sign_in_at come from Supabase Auth,
+      // not from public.profiles. Never return undefined — use null as the sentinel.
+      const email: string | null = typeof u.email === "string" && u.email.length > 0 ? u.email : null;
+      const lastSignInAt: string | null =
+        typeof u.last_sign_in_at === "string" && u.last_sign_in_at.length > 0
+          ? u.last_sign_in_at
+          : null;
+
       return {
         id: u.id,
-        email: u.email || null,
+        email,
         display_name: displayName,
         avatar_url: avatarUrl,
         role,
         created_at: u.created_at,
-        last_sign_in_at: u.last_sign_in_at || null,
+        last_sign_in_at: lastSignInAt,
         completed_count: userStats.completed_count,
         in_progress_count: userStats.in_progress_count,
         revision_count: userStats.revision_count,

@@ -120,6 +120,7 @@ export const UsersView: React.FC = () => {
     if (!isoString) return "—";
     try {
       const d = new Date(isoString);
+      if (isNaN(d.getTime())) return "—";
       return d.toLocaleDateString(undefined, {
         year: "numeric",
         month: "short",
@@ -131,10 +132,12 @@ export const UsersView: React.FC = () => {
   };
 
   const formatDateTime = (isoString: string | null): string => {
-    if (!isoString) return "—";
+    if (!isoString) return "Never";
     try {
       const d = new Date(isoString);
-      return d.toLocaleDateString(undefined, {
+      if (isNaN(d.getTime())) return "Never";
+      return d.toLocaleString(undefined, {
+        year: "numeric",
         month: "short",
         day: "numeric",
         hour: "2-digit",
