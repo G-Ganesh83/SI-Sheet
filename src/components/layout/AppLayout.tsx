@@ -15,6 +15,7 @@ import {
   Moon,
   Upload,
   Users,
+  MousePointerClick,
   LogOut,
   LogIn,
 } from "lucide-react";
@@ -44,6 +45,7 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
       ? [
           { id: "import" as ViewTab, label: "Import", icon: <Upload size={17} /> },
           { id: "users" as ViewTab, label: "Users", icon: <Users size={17} /> },
+          { id: "footer-clicks" as ViewTab, label: "Clicks", icon: <MousePointerClick size={17} /> },
         ]
       : []),
   ];

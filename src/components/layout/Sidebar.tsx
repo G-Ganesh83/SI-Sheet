@@ -13,9 +13,11 @@ import {
   Terminal,
   Upload,
   Users,
+  MousePointerClick,
   LogOut,
   LogIn,
 } from "lucide-react";
+import { recordFooterClick } from "../../services/adminService";
 
 export const Sidebar: React.FC = () => {
   const {
@@ -119,6 +121,14 @@ export const Sidebar: React.FC = () => {
               <Users size={16} />
               <span>Users</span>
             </button>
+            <button
+              type="button"
+              className={`nav-item ${activeTab === "footer-clicks" ? "active" : ""}`}
+              onClick={() => setActiveTab("footer-clicks")}
+            >
+              <MousePointerClick size={16} />
+              <span>Footer Clicks</span>
+            </button>
           </div>
         )}
       </nav>
@@ -174,6 +184,9 @@ export const Sidebar: React.FC = () => {
             className="creator-link"
             title="Ganesh on GitHub"
             aria-label="Ganesh on GitHub (opens in new tab)"
+            onClick={() => {
+              void recordFooterClick();
+            }}
           >
             Ganesh
           </a>{" "}
