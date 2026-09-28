@@ -600,6 +600,13 @@ a {
   font-family: var(--font-mono);
 }
 
+.compact-item-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
 /* ==========================================================================
    PROBLEM LIST / TABLE UI
    ========================================================================== */

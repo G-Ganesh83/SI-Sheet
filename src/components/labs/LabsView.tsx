@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { useTracker } from "../../context/useTracker";
+import { useAuth } from "../../context/useAuth";
 import { ProblemRow } from "../problems/ProblemRow";
 import { Calendar, ArrowUpRight } from "lucide-react";
 
 export const LabsView: React.FC = () => {
   const { labStats, selectLabFilter } = useTracker();
+  const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState<string>(labStats[0]?.date || "03 Aug 2026");
 
   const activeLab = labStats.find((l) => l.date === selectedDate);
@@ -69,13 +71,15 @@ export const LabsView: React.FC = () => {
                   {lab.date}
                 </span>
                 <span style={{ fontSize: "11px", fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>
-                  {lab.completed} / {lab.total}
+                  {user ? `${lab.completed} / ${lab.total}` : `${lab.total} problems`}
                 </span>
               </div>
 
-              <div className="mini-bar">
-                <div className="mini-bar-fill" style={{ width: `${percentage}%` }} />
-              </div>
+              {user && (
+                <div className="mini-bar">
+                  <div className="mini-bar-fill" style={{ width: `${percentage}%` }} />
+                </div>
+              )}
             </div>
           );
         })}
@@ -93,6 +97,8 @@ export const LabsView: React.FC = () => {
               backgroundColor: "var(--bg-card)",
               borderRadius: "var(--radius-md)",
               border: "1px solid var(--border-subtle)",
+              flexWrap: "wrap",
+              gap: 8,
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -112,22 +118,24 @@ export const LabsView: React.FC = () => {
               </span>
             </div>
 
-            <span style={{ fontSize: "12px", color: "var(--text-secondary)", fontFamily: "var(--font-mono)" }}>
-              {activeLab.completed} completed • {activeLab.inProgress} in progress • {activeLab.notStarted} not started
-            </span>
+            {user && (
+              <span style={{ fontSize: "12px", color: "var(--text-secondary)", fontFamily: "var(--font-mono)" }}>
+                {activeLab.completed} completed • {activeLab.inProgress} in progress • {activeLab.notStarted} not started
+              </span>
+            )}
           </div>
 
           <div className="problem-table-container">
             <table className="problem-table">
               <thead>
                 <tr>
-                  <th>Status</th>
+                  <th style={{ width: "130px" }}>Status</th>
                   <th>Problem</th>
-                  <th>Topics</th>
-                  <th>Lab Dates</th>
-                  <th>Revision</th>
-                  <th>Notes</th>
-                  <th style={{ textAlign: "right" }}>Open</th>
+                  <th style={{ minWidth: "160px" }}>Topics</th>
+                  <th style={{ width: "130px" }}>Lab Dates</th>
+                  <th style={{ width: "80px", textAlign: "center" }}>Revision</th>
+                  <th style={{ width: "80px", textAlign: "center" }}>Notes</th>
+                  <th style={{ width: "50px", textAlign: "right" }}>Open</th>
                 </tr>
               </thead>
               <tbody>

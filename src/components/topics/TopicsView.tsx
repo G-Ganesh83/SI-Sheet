@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { useTracker } from "../../context/useTracker";
+import { useAuth } from "../../context/useAuth";
 import { ProblemRow } from "../problems/ProblemRow";
 import { Tags, ArrowUpRight } from "lucide-react";
 
 export const TopicsView: React.FC = () => {
   const { topicStats, problems, selectTopicFilter } = useTracker();
+  const { user } = useAuth();
   const [selectedTopic, setSelectedTopic] = useState<string>(topicStats[0]?.topic || "Bit Manipulation");
 
   const topicProblems = problems.filter((p) => p.topics.includes(selectedTopic));
@@ -59,17 +61,25 @@ export const TopicsView: React.FC = () => {
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontWeight: 600, fontSize: "13px", color: isSelected ? "var(--accent-text)" : "var(--text-primary)" }}>
+                <span
+                  style={{
+                    fontWeight: 600,
+                    fontSize: "13px",
+                    color: isSelected ? "var(--accent-text)" : "var(--text-primary)",
+                  }}
+                >
                   {stat.topic}
                 </span>
                 <span style={{ fontSize: "11px", fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>
-                  {stat.completed} / {stat.total}
+                  {user ? `${stat.completed} / ${stat.total}` : `${stat.total} problems`}
                 </span>
               </div>
 
-              <div className="mini-bar">
-                <div className="mini-bar-fill" style={{ width: `${percentage}%` }} />
-              </div>
+              {user && (
+                <div className="mini-bar">
+                  <div className="mini-bar-fill" style={{ width: `${percentage}%` }} />
+                </div>
+              )}
             </div>
           );
         })}
@@ -87,6 +97,8 @@ export const TopicsView: React.FC = () => {
               backgroundColor: "var(--bg-card)",
               borderRadius: "var(--radius-md)",
               border: "1px solid var(--border-subtle)",
+              flexWrap: "wrap",
+              gap: 8,
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -99,7 +111,7 @@ export const TopicsView: React.FC = () => {
               </span>
             </div>
 
-            {activeStat && (
+            {user && activeStat && (
               <span style={{ fontSize: "12px", color: "var(--text-secondary)", fontFamily: "var(--font-mono)" }}>
                 {activeStat.completed} completed • {activeStat.inProgress} in progress • {activeStat.notStarted} not started
               </span>
@@ -110,13 +122,13 @@ export const TopicsView: React.FC = () => {
             <table className="problem-table">
               <thead>
                 <tr>
-                  <th>Status</th>
+                  <th style={{ width: "130px" }}>Status</th>
                   <th>Problem</th>
-                  <th>Topics</th>
-                  <th>Lab Dates</th>
-                  <th>Revision</th>
-                  <th>Notes</th>
-                  <th style={{ textAlign: "right" }}>Open</th>
+                  <th style={{ minWidth: "160px" }}>Topics</th>
+                  <th style={{ width: "130px" }}>Lab Dates</th>
+                  <th style={{ width: "80px", textAlign: "center" }}>Revision</th>
+                  <th style={{ width: "80px", textAlign: "center" }}>Notes</th>
+                  <th style={{ width: "50px", textAlign: "right" }}>Open</th>
                 </tr>
               </thead>
               <tbody>
