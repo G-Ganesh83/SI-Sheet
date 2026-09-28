@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useTracker } from "../../context/useTracker";
 import { useAuth } from "../../context/useAuth";
 import { Sidebar } from "./Sidebar";
@@ -25,8 +25,20 @@ const ADMIN_TABS: ViewTab[] = ["import", "users", "footer-clicks"];
 export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { activeTab, setActiveTab, theme, toggleTheme, revisionCount } = useTracker();
   const { user, profile, signOut, showAuthPrompt } = useAuth();
+  const activeNavItemRef = useRef<HTMLButtonElement | null>(null);
 
   const isAdmin = profile?.role === "admin";
+
+  // Auto-scroll active item into view on narrow screens
+  useEffect(() => {
+    if (activeNavItemRef.current) {
+      activeNavItemRef.current.scrollIntoView({
+        behavior: "smooth",
+        inline: "nearest",
+        block: "nearest",
+      });
+    }
+  }, [activeTab]);
 
   // Redirect non-admin users if currently on any admin tab
   useEffect(() => {
@@ -120,6 +132,7 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
           {mobileNavItems.map((item) => (
             <button
               key={item.id}
+              ref={activeTab === item.id ? activeNavItemRef : undefined}
               type="button"
               className={`mobile-nav-item ${activeTab === item.id ? "active" : ""}`}
               onClick={() => setActiveTab(item.id)}

@@ -347,13 +347,13 @@ export const FooterClicksView: React.FC = () => {
         </div>
       ) : (
         <div className="table-container admin-table-container">
-          <table className="problems-table admin-table">
+          <table className="problems-table admin-table admin-clicks-table">
             <thead>
               <tr>
-                <th style={{ width: "28%" }}>Time</th>
-                <th style={{ width: "30%" }}>Visitor</th>
-                <th style={{ width: "26%" }}>Email</th>
-                <th style={{ width: "16%", textAlign: "center" }}>Type</th>
+                <th className="col-click-time">Time</th>
+                <th className="col-click-visitor">Visitor</th>
+                <th className="col-click-email">Email</th>
+                <th className="col-click-type">Type</th>
               </tr>
             </thead>
             <tbody>

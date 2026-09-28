@@ -288,16 +288,16 @@ export const UsersView: React.FC = () => {
         </div>
       ) : (
         <div className="table-container admin-table-container">
-          <table className="problems-table admin-table">
+          <table className="problems-table admin-table admin-users-table">
             <thead>
               <tr>
-                <th style={{ width: "32%" }}>User</th>
-                <th style={{ width: "12%" }}>Role</th>
-                <th style={{ width: "14%", textAlign: "center" }}>Completed</th>
-                <th style={{ width: "14%", textAlign: "center" }}>In Progress</th>
-                <th style={{ width: "12%", textAlign: "center" }}>Revision</th>
-                <th style={{ width: "16%" }}>Joined</th>
-                <th style={{ width: "16%" }}>Last Sign-in</th>
+                <th className="col-user">User</th>
+                <th className="col-role">Role</th>
+                <th className="col-stat">Completed</th>
+                <th className="col-stat">In Progress</th>
+                <th className="col-stat">Revision</th>
+                <th className="col-joined">Joined</th>
+                <th className="col-last-signin">Last Sign-in</th>
               </tr>
             </thead>
             <tbody>
