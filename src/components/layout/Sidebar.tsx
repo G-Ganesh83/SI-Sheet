@@ -10,9 +10,7 @@ import {
   RotateCcw,
   Sun,
   Moon,
-  Download,
   Terminal,
-  RotateCw,
   Upload,
   LogOut,
   LogIn,
@@ -26,12 +24,12 @@ export const Sidebar: React.FC = () => {
     toggleTheme,
     totalProblems,
     revisionCount,
-    exportData,
-    resetAllProgress,
   } = useTracker();
   const { user, profile, signOut, showAuthPrompt } = useAuth();
 
-  const navItems: { id: ViewTab; label: string; icon: React.ReactNode; badge?: number | string }[] = [
+  const isAdmin = profile?.role === "admin";
+
+  const baseNavItems: { id: ViewTab; label: string; icon: React.ReactNode; badge?: number | string }[] = [
     {
       id: "dashboard",
       label: "Dashboard",
@@ -59,11 +57,6 @@ export const Sidebar: React.FC = () => {
       icon: <RotateCcw size={16} />,
       badge: revisionCount > 0 ? revisionCount : undefined,
     },
-    {
-      id: "import",
-      label: "Import",
-      icon: <Upload size={16} />,
-    },
   ];
 
   return (
@@ -87,7 +80,7 @@ export const Sidebar: React.FC = () => {
       </div>
 
       <nav className="sidebar-nav">
-        {navItems.map((item) => {
+        {baseNavItems.map((item) => {
           const isActive = activeTab === item.id;
           return (
             <button
@@ -102,6 +95,23 @@ export const Sidebar: React.FC = () => {
             </button>
           );
         })}
+
+        {isAdmin && (
+          <div className="sidebar-admin-section">
+            <div className="sidebar-section-divider" role="separator" />
+            <div className="sidebar-section-header">
+              <span>Admin</span>
+            </div>
+            <button
+              type="button"
+              className={`nav-item ${activeTab === "import" ? "active" : ""}`}
+              onClick={() => setActiveTab("import")}
+            >
+              <Upload size={16} />
+              <span>Import</span>
+            </button>
+          </div>
+        )}
       </nav>
 
       {user ? (
@@ -132,39 +142,21 @@ export const Sidebar: React.FC = () => {
           </button>
         </div>
       ) : (
-        <button
-          type="button"
-          className="sidebar-signin-btn"
-          onClick={showAuthPrompt}
-          title="Sign in with Google to save progress"
-        >
-          <LogIn size={14} />
-          <span>Sign in</span>
-        </button>
+        <div className="sidebar-signin-wrapper">
+          <button
+            type="button"
+            className="sidebar-signin-btn"
+            onClick={showAuthPrompt}
+            title="Sign in with Google to save progress"
+          >
+            <LogIn size={14} />
+            <span>Sign in</span>
+          </button>
+        </div>
       )}
 
       <div className="sidebar-footer">
-        <div style={{ display: "flex", gap: 4 }}>
-          <button
-            type="button"
-            className="btn-icon"
-            onClick={exportData}
-            title="Export local progress backup JSON"
-          >
-            <Download size={14} />
-          </button>
-          <button
-            type="button"
-            className="btn-icon"
-            onClick={resetAllProgress}
-            title="Reset progress"
-          >
-            <RotateCw size={14} />
-          </button>
-        </div>
-        <span style={{ fontSize: "11px", color: "var(--text-faint)", fontFamily: "var(--font-mono)" }}>
-          v1.0 Local
-        </span>
+        <span className="creator-credit">Built with ♥ by Ganesh · v2.0</span>
       </div>
     </aside>
   );

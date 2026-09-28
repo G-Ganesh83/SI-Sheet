@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useTracker } from "../../context/useTracker";
 import { useAuth } from "../../context/useAuth";
 import { Sidebar } from "./Sidebar";
@@ -20,7 +20,16 @@ import {
 
 export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { activeTab, setActiveTab, theme, toggleTheme, revisionCount } = useTracker();
-  const { user, signOut, showAuthPrompt } = useAuth();
+  const { user, profile, signOut, showAuthPrompt } = useAuth();
+
+  const isAdmin = profile?.role === "admin";
+
+  // Redirect non-admin users if currently on import tab
+  useEffect(() => {
+    if (!isAdmin && activeTab === "import") {
+      setActiveTab("dashboard");
+    }
+  }, [isAdmin, activeTab, setActiveTab]);
 
   const mobileNavItems: { id: ViewTab; label: string; icon: React.ReactNode }[] = [
     { id: "dashboard", label: "Dashboard", icon: <LayoutDashboard size={17} /> },
@@ -28,7 +37,7 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
     { id: "topics", label: "Topics", icon: <Tags size={17} /> },
     { id: "labs", label: "Labs", icon: <Calendar size={17} /> },
     { id: "revision", label: "Revision", icon: <RotateCcw size={17} /> },
-    { id: "import", label: "Import", icon: <Upload size={17} /> },
+    ...(isAdmin ? [{ id: "import" as ViewTab, label: "Import", icon: <Upload size={17} /> }] : []),
   ];
 
   return (
