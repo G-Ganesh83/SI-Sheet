@@ -671,6 +671,7 @@ a {
 
 .filter-select {
   height: 30px;
+  max-width: 100%;
   appearance: none;
   -webkit-appearance: none;
   background-color: var(--bg-card);
@@ -1641,7 +1642,8 @@ input:disabled {
 
   .problem-row {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: center;
     gap: 7px;
     background-color: var(--bg-card);
     border: 1px solid var(--border-subtle);
@@ -1674,20 +1676,27 @@ input:disabled {
 
   .cell-labs {
     order: 4;
+    padding-bottom: 6px !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
   }
 
   .cell-revision {
     order: 5;
-    padding-top: 6px !important;
-    border-top: 1px solid var(--border-subtle) !important;
+    width: auto !important;
+    padding-top: 2px !important;
   }
 
   .cell-notes {
     order: 6;
+    width: auto !important;
+    padding-top: 2px !important;
   }
 
   .cell-open {
     order: 7;
+    width: auto !important;
+    margin-left: auto !important;
+    padding-top: 2px !important;
     justify-content: flex-end;
   }
 

@@ -95,6 +95,28 @@ export const ProblemsView: React.FC = () => {
     ? `${filteredProblems.length} of ${totalProblems} problems`
     : `${totalProblems} problems`;
 
+  const hasSearch = Boolean(filters.search.trim());
+  const hasActiveFilters =
+    filters.status !== "all" ||
+    filters.revision !== "all" ||
+    filters.topic !== "all" ||
+    filters.labDate !== "all" ||
+    filters.platform !== "all";
+
+  const emptyTitle =
+    hasSearch && !hasActiveFilters
+      ? "No problems match your search."
+      : !hasSearch && hasActiveFilters
+      ? "No problems match these filters."
+      : "No problems match your search or filters.";
+
+  const emptyDesc =
+    hasSearch && !hasActiveFilters
+      ? "Try checking your spelling or searching for a different keyword."
+      : !hasSearch && hasActiveFilters
+      ? "Try adjusting your filter criteria to find what you're looking for."
+      : "Try adjusting your search query or clearing your filter selections.";
+
   return (
     <div className="view-container">
       {/* View Header */}
@@ -148,20 +170,19 @@ export const ProblemsView: React.FC = () => {
             border: "1px solid var(--border-subtle)",
             borderRadius: "var(--radius-md)",
             marginTop: 8,
+            padding: "32px 16px",
           }}
         >
-          <SearchX size={32} className="empty-state-icon" />
-          <h3 className="empty-state-title">No problems found</h3>
-          <p className="empty-state-desc">
-            No problems match your current search and filter settings. Try adjusting or clearing your filters.
-          </p>
+          <SearchX size={24} className="empty-state-icon" />
+          <h3 className="empty-state-title">{emptyTitle}</h3>
+          <p className="empty-state-desc">{emptyDesc}</p>
           <button
             type="button"
             className="btn-secondary"
             style={{ marginTop: 8 }}
             onClick={resetFilters}
           >
-            Reset All Filters
+            {hasSearch && !hasActiveFilters ? "Clear Search" : "Reset All Filters"}
           </button>
         </div>
       )}
