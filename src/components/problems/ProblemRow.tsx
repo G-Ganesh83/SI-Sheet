@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import type { Problem } from "../../types/tracker";
+import React, { useState, useCallback } from "react";
+import type { Problem, ProblemStatus } from "../../types/tracker";
 import { useTracker } from "../../context/useTracker";
+import { useAuth } from "../../context/useAuth";
 import { StatusBadge } from "../common/StatusBadge";
 import { RevisionCheckbox } from "../common/RevisionCheckbox";
 import { NotesModal } from "../common/NotesPopover";
@@ -20,10 +21,24 @@ export const ProblemRow: React.FC<ProblemRowProps> = ({ problem }) => {
     selectTopicFilter,
     selectLabFilter,
   } = useTracker();
+  const { user, showAuthPrompt } = useAuth();
 
   const [isNotesOpen, setIsNotesOpen] = useState(false);
   const progress = getProgress(problem.id);
   const hasNotes = Boolean(progress.notes && progress.notes.trim().length > 0);
+
+  /** Wrap personal action handlers to prompt sign-in when anonymous */
+  const requireAuth = useCallback(
+    <T extends unknown[]>(fn: (...args: T) => void) =>
+      (...args: T) => {
+        if (!user) {
+          showAuthPrompt();
+          return;
+        }
+        fn(...args);
+      },
+    [user, showAuthPrompt]
+  );
 
   const getPlatformClass = (platform: string) => {
     switch (platform) {
@@ -46,7 +61,7 @@ export const ProblemRow: React.FC<ProblemRowProps> = ({ problem }) => {
         <td className="cell-status">
           <StatusBadge
             status={progress.status}
-            onChange={(s) => updateStatus(problem.id, s)}
+            onChange={requireAuth((s: ProblemStatus) => updateStatus(problem.id, s))}
           />
         </td>
 
@@ -119,7 +134,7 @@ export const ProblemRow: React.FC<ProblemRowProps> = ({ problem }) => {
         <td className="cell-revision">
           <RevisionCheckbox
             checked={progress.revision}
-            onChange={() => toggleRevision(problem.id)}
+            onChange={requireAuth(() => toggleRevision(problem.id))}
             compact={true}
           />
         </td>
@@ -129,7 +144,13 @@ export const ProblemRow: React.FC<ProblemRowProps> = ({ problem }) => {
           <button
             type="button"
             className={`btn-notes ${hasNotes ? "has-notes" : ""}`}
-            onClick={() => setIsNotesOpen(true)}
+            onClick={() => {
+              if (!user) {
+                showAuthPrompt();
+                return;
+              }
+              setIsNotesOpen(true);
+            }}
             title={hasNotes ? "Edit notes (Notes exist)" : "Add personal notes"}
           >
             {hasNotes ? (
@@ -168,7 +189,7 @@ export const ProblemRow: React.FC<ProblemRowProps> = ({ problem }) => {
         initialNotes={progress.notes}
         isOpen={isNotesOpen}
         onClose={() => setIsNotesOpen(false)}
-        onSave={(newNotes) => saveNotes(problem.id, newNotes)}
+        onSave={requireAuth((newNotes) => saveNotes(problem.id, newNotes))}
       />
     </>
   );
