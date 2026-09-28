@@ -11,8 +11,7 @@ import { TopicsView } from "./components/topics/TopicsView";
 import { LabsView } from "./components/labs/LabsView";
 import { RevisionView } from "./components/revision/RevisionView";
 import { ImportView } from "./components/import/ImportView";
-import { LoginView } from "./components/auth/LoginView";
-import { LoadingScreen } from "./components/auth/LoadingScreen";
+import { AuthPromptModal } from "./components/auth/AuthPromptModal";
 
 const AppContent: React.FC = () => {
   const { activeTab } = useTracker();
@@ -42,22 +41,15 @@ const AppContent: React.FC = () => {
   );
 };
 
-const ProtectedApp: React.FC = () => {
-  const { user, isLoading } = useAuth();
-
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
-
-  if (!user) {
-    return <LoginView />;
-  }
+const AppRoot: React.FC = () => {
+  const { authPromptOpen, closeAuthPrompt } = useAuth();
 
   return (
     <TrackerProvider>
       <AppLayout>
         <AppContent />
       </AppLayout>
+      {authPromptOpen && <AuthPromptModal onClose={closeAuthPrompt} />}
     </TrackerProvider>
   );
 };
@@ -65,7 +57,7 @@ const ProtectedApp: React.FC = () => {
 export default function App() {
   return (
     <AuthProvider>
-      <ProtectedApp />
+      <AppRoot />
       <Analytics />
     </AuthProvider>
   );

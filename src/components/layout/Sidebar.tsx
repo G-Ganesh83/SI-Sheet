@@ -15,6 +15,7 @@ import {
   RotateCw,
   Upload,
   LogOut,
+  LogIn,
 } from "lucide-react";
 
 export const Sidebar: React.FC = () => {
@@ -28,7 +29,7 @@ export const Sidebar: React.FC = () => {
     exportData,
     resetAllProgress,
   } = useTracker();
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, showAuthPrompt } = useAuth();
 
   const navItems: { id: ViewTab; label: string; icon: React.ReactNode; badge?: number | string }[] = [
     {
@@ -103,7 +104,7 @@ export const Sidebar: React.FC = () => {
         })}
       </nav>
 
-      {user && (
+      {user ? (
         <div className="sidebar-user">
           <div className="sidebar-user-avatar">
             {profile?.avatar_url ? (
@@ -130,6 +131,16 @@ export const Sidebar: React.FC = () => {
             <LogOut size={14} />
           </button>
         </div>
+      ) : (
+        <button
+          type="button"
+          className="sidebar-signin-btn"
+          onClick={showAuthPrompt}
+          title="Sign in with Google to save progress"
+        >
+          <LogIn size={14} />
+          <span>Sign in</span>
+        </button>
       )}
 
       <div className="sidebar-footer">

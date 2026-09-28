@@ -10,6 +10,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(() => Boolean(supabase));
   const [error, setError] = useState<string | null>(null);
+  const [authPromptOpen, setAuthPromptOpen] = useState<boolean>(false);
+
+  const showAuthPrompt = useCallback(() => {
+    setAuthPromptOpen(true);
+  }, []);
+
+  const closeAuthPrompt = useCallback(() => {
+    setAuthPromptOpen(false);
+  }, []);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -169,8 +178,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signInWithGoogle,
       signOut,
       clearError,
+      authPromptOpen,
+      showAuthPrompt,
+      closeAuthPrompt,
     }),
-    [session, user, profile, isLoading, error, signInWithGoogle, signOut, clearError]
+    [session, user, profile, isLoading, error, signInWithGoogle, signOut, clearError, authPromptOpen, showAuthPrompt, closeAuthPrompt]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

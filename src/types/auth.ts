@@ -19,4 +19,9 @@ export interface AuthContextValue {
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   clearError: () => void;
+  /** Open the inline sign-in prompt modal (no page navigation). */
+  showAuthPrompt: () => void;
+  /** Close the inline sign-in prompt modal. */
+  closeAuthPrompt: () => void;
+  authPromptOpen: boolean;
 }

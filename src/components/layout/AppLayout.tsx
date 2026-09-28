@@ -15,11 +15,12 @@ import {
   Moon,
   Upload,
   LogOut,
+  LogIn,
 } from "lucide-react";
 
 export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { activeTab, setActiveTab, theme, toggleTheme, revisionCount } = useTracker();
-  const { signOut } = useAuth();
+  const { user, signOut, showAuthPrompt } = useAuth();
 
   const mobileNavItems: { id: ViewTab; label: string; icon: React.ReactNode }[] = [
     { id: "dashboard", label: "Dashboard", icon: <LayoutDashboard size={17} /> },
@@ -54,15 +55,27 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
             >
               {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
             </button>
-            <button
-              type="button"
-              className="btn-icon"
-              onClick={signOut}
-              title="Sign out"
-              aria-label="Sign out"
-            >
-              <LogOut size={16} />
-            </button>
+            {user ? (
+              <button
+                type="button"
+                className="btn-icon"
+                onClick={signOut}
+                title="Sign out"
+                aria-label="Sign out"
+              >
+                <LogOut size={16} />
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="btn-icon"
+                onClick={showAuthPrompt}
+                title="Sign in"
+                aria-label="Sign in"
+              >
+                <LogIn size={16} />
+              </button>
+            )}
           </div>
         </header>
 

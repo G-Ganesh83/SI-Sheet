@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useTracker } from "../../context/useTracker";
+import { useAuth } from "../../context/useAuth";
 import { StatusBadge } from "./StatusBadge";
 import { RevisionCheckbox } from "./RevisionCheckbox";
-import { ExternalLink, X, Calendar, Tag, FileText, Check } from "lucide-react";
+import { ExternalLink, X, Calendar, Tag, FileText, Check, Lock } from "lucide-react";
 
 export const ProblemDrawer: React.FC = () => {
   const {
@@ -16,6 +17,7 @@ export const ProblemDrawer: React.FC = () => {
     selectTopicFilter,
     selectLabFilter,
   } = useTracker();
+  const { user, showAuthPrompt } = useAuth();
 
   const problem = problems.find((p) => p.id === selectedProblemId);
   const progress = selectedProblemId ? getProgress(selectedProblemId) : null;
@@ -45,13 +47,31 @@ export const ProblemDrawer: React.FC = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedProblemId, setSelectedProblemId]);
 
+  /** Wrap a personal-action handler: if no session, show auth prompt instead. */
+  const requireAuth = useCallback(
+    <T extends unknown[]>(fn: (...args: T) => void) =>
+      (...args: T) => {
+        if (!user) {
+          showAuthPrompt();
+          return;
+        }
+        fn(...args);
+      },
+    [user, showAuthPrompt]
+  );
+
   if (!problem || !progress) return null;
 
   const handleSaveNotes = () => {
+    if (!user) {
+      showAuthPrompt();
+      return;
+    }
     saveNotes(problem.id, notes);
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 2000);
   };
+
 
   const getPlatformClass = (platform: string) => {
     switch (platform) {
@@ -111,14 +131,14 @@ export const ProblemDrawer: React.FC = () => {
               <span style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 600 }}>
                 Status
               </span>
-              <StatusBadge status={progress.status} onChange={(s) => updateStatus(problem.id, s)} />
+              <StatusBadge status={progress.status} onChange={requireAuth((s) => updateStatus(problem.id, s))} />
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-end" }}>
               <span style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 600 }}>
                 Revision
               </span>
-              <RevisionCheckbox checked={progress.revision} onChange={() => toggleRevision(problem.id)} label="Need Revision" />
+              <RevisionCheckbox checked={progress.revision} onChange={requireAuth(() => toggleRevision(problem.id))} label="Need Revision" />
             </div>
           </div>
 
@@ -215,19 +235,33 @@ export const ProblemDrawer: React.FC = () => {
                 </span>
               )}
             </div>
-            <textarea
-              className="notes-textarea"
-              style={{ flex: 1, minHeight: "140px" }}
-              placeholder="Record your solution intuition, complexity (O(N) / O(1)), edge cases to remember..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-            />
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
-              <button type="button" className="btn-secondary" onClick={handleSaveNotes}>
-                <Check size={13} />
-                <span>Save Notes</span>
+            {!user ? (
+              <button
+                type="button"
+                className="auth-notes-gate"
+                onClick={showAuthPrompt}
+                aria-label="Sign in to save notes"
+              >
+                <Lock size={14} className="auth-notes-gate-icon" />
+                <span>Sign in to save personal notes</span>
               </button>
-            </div>
+            ) : (
+              <>
+                <textarea
+                  className="notes-textarea"
+                  style={{ flex: 1, minHeight: "140px" }}
+                  placeholder="Record your solution intuition, complexity (O(N) / O(1)), edge cases to remember..."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
+                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+                  <button type="button" className="btn-secondary" onClick={handleSaveNotes}>
+                    <Check size={13} />
+                    <span>Save Notes</span>
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
