@@ -1,4 +1,5 @@
 import React from "react";
+import { Analytics } from "@vercel/analytics/react";
 import { TrackerProvider } from "./context/TrackerContext";
 import { useTracker } from "./context/useTracker";
 import { AppLayout } from "./components/layout/AppLayout";
@@ -43,6 +44,7 @@ export default function App() {
       <AppLayout>
         <AppContent />
       </AppLayout>
+      <Analytics />
     </TrackerProvider>
   );
 }
