@@ -155,9 +155,22 @@ export const Sidebar: React.FC = () => {
         </div>
       )}
 
-      <div className="sidebar-footer">
-        <span className="creator-credit">Built with ♥ by Ganesh · v2.0</span>
-      </div>
+      <footer className="sidebar-footer">
+        <span className="creator-credit">
+          Built with <span className="creator-heart" aria-hidden="true">♥</span> by{" "}
+          <a
+            href="https://github.com/G-Ganesh83"
+            target="_blank"
+            rel="noreferrer"
+            className="creator-link"
+            title="Ganesh on GitHub"
+            aria-label="Ganesh on GitHub (opens in new tab)"
+          >
+            Ganesh
+          </a>{" "}
+          · v2.0
+        </span>
+      </footer>
     </aside>
   );
 };

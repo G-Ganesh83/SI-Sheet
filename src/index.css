@@ -303,12 +303,13 @@ a {
 }
 
 .sidebar-footer {
-  padding: 10px 12px 12px;
+  padding: 11px 12px 13px;
   border-top: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+  flex-shrink: 0;
 }
 
 .creator-credit {
@@ -316,9 +317,26 @@ a {
   color: var(--text-faint);
   font-family: var(--font-mono);
   letter-spacing: -0.01em;
-  user-select: none;
   line-height: 1.4;
   white-space: nowrap;
+}
+
+.creator-heart {
+  color: var(--status-not-started);
+  display: inline-block;
+  padding: 0 1px;
+}
+
+.creator-link {
+  color: var(--status-not-started);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity var(--transition-fast), text-decoration-color var(--transition-fast);
+}
+
+.creator-link:hover {
+  text-decoration: underline;
+  opacity: 0.85;
 }
 
 .main-content {
