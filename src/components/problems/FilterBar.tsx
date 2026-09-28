@@ -32,7 +32,7 @@ export const FilterBar: React.FC = () => {
 
   return (
     <div className="table-filter-bar">
-      {/* Search Input Bar */}
+      {/* Primary Search Input */}
       <div className="search-and-quick">
         <div className="search-input-wrapper">
           <Search size={15} className="search-icon" />
@@ -52,20 +52,21 @@ export const FilterBar: React.FC = () => {
               style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)" }}
               onClick={() => setFilters((prev) => ({ ...prev, search: "" }))}
               title="Clear search"
+              aria-label="Clear search input"
             >
               <X size={13} />
             </button>
           ) : (
-            <span className="search-shortcut">/</span>
+            <span className="search-shortcut" title="Press / to search">/</span>
           )}
         </div>
       </div>
 
-      {/* Filter Row */}
+      {/* Secondary Filters Row */}
       <div className="filters-row">
         {/* Status Filter */}
         <select
-          className="filter-select"
+          className={`filter-select ${filters.status !== "all" ? "filter-active" : ""}`}
           value={filters.status}
           onChange={(e) => setFilters((prev) => ({ ...prev, status: e.target.value as "all" | ProblemStatus }))}
           title="Filter by status"
@@ -79,7 +80,7 @@ export const FilterBar: React.FC = () => {
 
         {/* Revision Filter */}
         <select
-          className="filter-select"
+          className={`filter-select ${filters.revision !== "all" ? "filter-active" : ""}`}
           value={filters.revision}
           onChange={(e) => setFilters((prev) => ({ ...prev, revision: e.target.value as any }))}
           title="Filter by revision flag"
@@ -92,13 +93,13 @@ export const FilterBar: React.FC = () => {
 
         {/* Topic Filter */}
         <select
-          className="filter-select"
+          className={`filter-select ${filters.topic !== "all" ? "filter-active" : ""}`}
           value={filters.topic}
           onChange={(e) => setFilters((prev) => ({ ...prev, topic: e.target.value }))}
           title="Filter by topic"
           aria-label="Filter by topic"
         >
-          <option value="all">Topic: All Topics ({allTopics.length})</option>
+          <option value="all">Topic: All ({allTopics.length})</option>
           {allTopics.map((topic) => (
             <option key={topic} value={topic}>
               {topic}
@@ -108,13 +109,13 @@ export const FilterBar: React.FC = () => {
 
         {/* Lab Date Filter */}
         <select
-          className="filter-select"
+          className={`filter-select ${filters.labDate !== "all" ? "filter-active" : ""}`}
           value={filters.labDate}
           onChange={(e) => setFilters((prev) => ({ ...prev, labDate: e.target.value }))}
           title="Filter by lab date"
           aria-label="Filter by lab date"
         >
-          <option value="all">Lab: All Dates ({allLabDates.length})</option>
+          <option value="all">Lab: All ({allLabDates.length})</option>
           {allLabDates.map((date) => (
             <option key={date} value={date}>
               {date}
@@ -124,7 +125,7 @@ export const FilterBar: React.FC = () => {
 
         {/* Platform Filter */}
         <select
-          className="filter-select"
+          className={`filter-select ${filters.platform !== "all" ? "filter-active" : ""}`}
           value={filters.platform}
           onChange={(e) => setFilters((prev) => ({ ...prev, platform: e.target.value }))}
           title="Filter by platform"
@@ -157,7 +158,13 @@ export const FilterBar: React.FC = () => {
 
         {/* Clear Filters button */}
         {hasActiveFilters && (
-          <button type="button" className="filter-clear-btn" onClick={resetFilters}>
+          <button
+            type="button"
+            className="filter-clear-btn"
+            onClick={resetFilters}
+            title="Reset all filters"
+            aria-label="Reset all filters"
+          >
             <X size={12} />
             <span>Reset Filters</span>
           </button>

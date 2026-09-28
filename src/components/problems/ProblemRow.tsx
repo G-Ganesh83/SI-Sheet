@@ -67,38 +67,25 @@ export const ProblemRow: React.FC<ProblemRowProps> = ({ problem }) => {
 
         {/* Problem Title & Platform */}
         <td className="cell-title">
-          <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <button
-                type="button"
-                className="problem-title-link"
-                style={{
-                  fontWeight: 600,
-                  color: "var(--text-primary)",
-                  cursor: "pointer",
-                  fontSize: "13px",
-                  background: "none",
-                  border: "none",
-                  padding: 0,
-                  textAlign: "left",
-                }}
-                onClick={() => setSelectedProblemId(problem.id)}
-                title="View full problem details and notes"
-                aria-label={`View details and notes for ${problem.title}`}
-              >
-                {problem.title}
-              </button>
-
-              <span className={`platform-badge ${getPlatformClass(problem.platform)}`}>
-                {problem.platform}
-              </span>
-            </div>
+          <div className="problem-title-cell">
+            <button
+              type="button"
+              className="problem-title-link"
+              onClick={() => setSelectedProblemId(problem.id)}
+              title="View problem details and notes"
+              aria-label={`View details and notes for ${problem.title}`}
+            >
+              {problem.title}
+            </button>
+            <span className={`platform-badge ${getPlatformClass(problem.platform)}`}>
+              {problem.platform}
+            </span>
           </div>
         </td>
 
         {/* Algorithmic Topics */}
         <td className="cell-topics">
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+          <div className="tags-container">
             {problem.topics.map((t) => (
               <button
                 key={t}
@@ -115,7 +102,7 @@ export const ProblemRow: React.FC<ProblemRowProps> = ({ problem }) => {
 
         {/* Lab Dates */}
         <td className="cell-labs">
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+          <div className="tags-container">
             {problem.labDates.map((date) => (
               <button
                 key={date}
@@ -131,7 +118,7 @@ export const ProblemRow: React.FC<ProblemRowProps> = ({ problem }) => {
         </td>
 
         {/* Revision Toggle */}
-        <td className="cell-revision">
+        <td className="cell-revision" style={{ textAlign: "center" }}>
           <RevisionCheckbox
             checked={progress.revision}
             onChange={requireAuth(() => toggleRevision(problem.id))}
@@ -140,10 +127,10 @@ export const ProblemRow: React.FC<ProblemRowProps> = ({ problem }) => {
         </td>
 
         {/* Notes Action */}
-        <td className="cell-notes">
+        <td className="cell-notes" style={{ textAlign: "center" }}>
           <button
             type="button"
-            className={`btn-notes ${hasNotes ? "has-notes" : ""}`}
+            className={`btn-notes-compact ${hasNotes ? "has-notes" : ""}`}
             onClick={() => {
               if (!user) {
                 showAuthPrompt();
@@ -151,33 +138,34 @@ export const ProblemRow: React.FC<ProblemRowProps> = ({ problem }) => {
               }
               setIsNotesOpen(true);
             }}
-            title={hasNotes ? "Edit notes (Notes exist)" : "Add personal notes"}
+            title={hasNotes ? "Edit notes (Notes exist)" : "Add notes"}
+            aria-label={hasNotes ? `Edit notes for ${problem.title}` : `Add notes for ${problem.title}`}
           >
             {hasNotes ? (
               <>
-                <FileText size={12} style={{ color: "var(--accent-text)" }} />
-                <span>📝 Notes</span>
+                <FileText size={12} className="notes-icon-active" />
+                <span className="notes-text">Notes</span>
               </>
             ) : (
               <>
                 <FileEdit size={12} />
-                <span>Notes</span>
+                <span className="notes-text">Notes</span>
               </>
             )}
           </button>
         </td>
 
         {/* External Link */}
-        <td className="cell-open">
+        <td className="cell-open" style={{ textAlign: "right" }}>
           <a
             href={problem.url}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-icon"
-            title={`Open original problem on ${problem.platform} in new tab`}
+            title={`Open problem on ${problem.platform} in new tab`}
             aria-label={`Open ${problem.title} on ${problem.platform} (opens in new tab)`}
           >
-            <ExternalLink size={14} />
+            <ExternalLink size={13} />
           </a>
         </td>
       </tr>

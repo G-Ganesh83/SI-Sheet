@@ -90,24 +90,24 @@ export const ProblemsView: React.FC = () => {
       });
   }, [problems, getProgress, filters, allLabDates]);
 
+  const isFiltered = filteredProblems.length !== totalProblems;
+  const countLabel = isFiltered
+    ? `${filteredProblems.length} of ${totalProblems} problems`
+    : `${totalProblems} problems`;
+
   return (
     <div className="view-container">
       {/* View Header */}
       <div className="view-header">
         <div className="view-title-row">
           <h1 className="view-title">Problems</h1>
-          <div
-            style={{
-              fontSize: "12px",
-              fontFamily: "var(--font-mono)",
-              color: "var(--text-muted)",
-              background: "var(--bg-card)",
-              border: "1px solid var(--border-subtle)",
-              padding: "4px 10px",
-              borderRadius: "var(--radius-sm)",
-            }}
-          >
-            {filteredProblems.length} of {totalProblems} problems ({completedCount} completed)
+          <div className="result-count-badge">
+            <span>{countLabel}</span>
+            {completedCount > 0 && (
+              <span className="result-count-completed">
+                · {completedCount} completed
+              </span>
+            )}
           </div>
         </div>
         <p className="view-subtitle">
@@ -124,13 +124,13 @@ export const ProblemsView: React.FC = () => {
           <table className="problem-table">
             <thead>
               <tr>
-                <th>Status</th>
+                <th style={{ width: "130px" }}>Status</th>
                 <th>Problem</th>
-                <th>Topics</th>
-                <th>Lab Dates</th>
-                <th>Revision</th>
-                <th>Notes</th>
-                <th style={{ textAlign: "right" }}>Open</th>
+                <th style={{ minWidth: "160px" }}>Topics</th>
+                <th style={{ width: "130px" }}>Lab Dates</th>
+                <th style={{ width: "80px", textAlign: "center" }}>Revision</th>
+                <th style={{ width: "80px", textAlign: "center" }}>Notes</th>
+                <th style={{ width: "50px", textAlign: "right" }}>Open</th>
               </tr>
             </thead>
             <tbody>

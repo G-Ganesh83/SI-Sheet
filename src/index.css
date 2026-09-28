@@ -755,8 +755,34 @@ a {
   background-color: var(--bg-card-hover);
 }
 
+.problem-title-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.problem-title-link {
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 13px;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  line-height: 1.35;
+  transition: color var(--transition-fast);
+}
+
 .problem-title-link:hover {
   color: var(--accent-text) !important;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 /* Minimalist Status Badge */
@@ -864,6 +890,38 @@ a {
   border-color: var(--border-subtle);
 }
 
+.btn-notes-compact {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 7px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  color: var(--text-muted);
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-notes-compact:hover {
+  color: var(--text-primary);
+  border-color: var(--border-default);
+  background-color: var(--bg-card-hover);
+}
+
+.btn-notes-compact.has-notes {
+  color: var(--accent-text);
+  background-color: var(--accent-subtle);
+  border-color: rgba(99, 102, 241, 0.25);
+}
+
+.notes-icon-active {
+  color: var(--accent-text);
+}
+
 .btn-notes {
   display: inline-flex;
   align-items: center;
@@ -888,6 +946,30 @@ a {
   color: var(--accent-text);
   background-color: var(--accent-subtle);
   border-color: rgba(99, 102, 241, 0.25);
+}
+
+.filter-active {
+  border-color: var(--accent) !important;
+  color: var(--text-primary) !important;
+  background-color: var(--bg-elevated) !important;
+}
+
+.result-count-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  letter-spacing: -0.01em;
+}
+
+.result-count-completed {
+  color: var(--status-completed);
   font-weight: 500;
 }
 
