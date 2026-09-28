@@ -24,7 +24,7 @@ export interface UserProgressStore {
   theme: "dark" | "light";
 }
 
-export type ViewTab = "dashboard" | "problems" | "topics" | "labs" | "revision" | "import";
+export type ViewTab = "dashboard" | "problems" | "topics" | "labs" | "revision" | "import" | "users" | "footer-clicks";
 
 export interface FilterState {
   search: string;

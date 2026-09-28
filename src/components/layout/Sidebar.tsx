@@ -12,6 +12,7 @@ import {
   Moon,
   Terminal,
   Upload,
+  Users,
   LogOut,
   LogIn,
 } from "lucide-react";
@@ -109,6 +110,14 @@ export const Sidebar: React.FC = () => {
             >
               <Upload size={16} />
               <span>Import</span>
+            </button>
+            <button
+              type="button"
+              className={`nav-item ${activeTab === "users" ? "active" : ""}`}
+              onClick={() => setActiveTab("users")}
+            >
+              <Users size={16} />
+              <span>Users</span>
             </button>
           </div>
         )}

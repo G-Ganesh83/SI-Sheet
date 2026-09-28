@@ -14,9 +14,12 @@ import {
   Sun,
   Moon,
   Upload,
+  Users,
   LogOut,
   LogIn,
 } from "lucide-react";
+
+const ADMIN_TABS: ViewTab[] = ["import", "users", "footer-clicks"];
 
 export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { activeTab, setActiveTab, theme, toggleTheme, revisionCount } = useTracker();
@@ -24,9 +27,9 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
 
   const isAdmin = profile?.role === "admin";
 
-  // Redirect non-admin users if currently on import tab
+  // Redirect non-admin users if currently on any admin tab
   useEffect(() => {
-    if (!isAdmin && activeTab === "import") {
+    if (!isAdmin && ADMIN_TABS.includes(activeTab)) {
       setActiveTab("dashboard");
     }
   }, [isAdmin, activeTab, setActiveTab]);
@@ -37,7 +40,12 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
     { id: "topics", label: "Topics", icon: <Tags size={17} /> },
     { id: "labs", label: "Labs", icon: <Calendar size={17} /> },
     { id: "revision", label: "Revision", icon: <RotateCcw size={17} /> },
-    ...(isAdmin ? [{ id: "import" as ViewTab, label: "Import", icon: <Upload size={17} /> }] : []),
+    ...(isAdmin
+      ? [
+          { id: "import" as ViewTab, label: "Import", icon: <Upload size={17} /> },
+          { id: "users" as ViewTab, label: "Users", icon: <Users size={17} /> },
+        ]
+      : []),
   ];
 
   return (

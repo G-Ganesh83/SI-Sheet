@@ -11,6 +11,7 @@ import { TopicsView } from "./components/topics/TopicsView";
 import { LabsView } from "./components/labs/LabsView";
 import { RevisionView } from "./components/revision/RevisionView";
 import { ImportView } from "./components/import/ImportView";
+import { UsersView } from "./components/admin/UsersView";
 import { AuthPromptModal } from "./components/auth/AuthPromptModal";
 
 const AppContent: React.FC = () => {
@@ -28,6 +29,8 @@ const AppContent: React.FC = () => {
         return <RevisionView />;
       case "import":
         return <ImportView />;
+      case "users":
+        return <UsersView />;
       case "dashboard":
       default:
         return <DashboardView />;
