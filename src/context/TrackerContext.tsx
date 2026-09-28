@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import type {
   DatasetImportCandidate,
   DatasetImportResult,
@@ -6,7 +6,6 @@ import type {
   Problem,
   ProblemStatus,
   UserProblemState,
-  UserProgressStore,
   ImportHistoryEntry,
   TopicStat,
   LabStat,
@@ -17,9 +16,18 @@ import { PROBLEMS } from "../data/problems";
 import { runDevDatasetValidation, validateProblemDataset } from "../data/validator";
 import { TrackerContext } from "./TrackerContextBase";
 import { countLabAssignments, DATASET_SCHEMA_VERSION } from "../data/importer";
+import { useAuth } from "./useAuth";
+import {
+  loadUserProgress,
+  saveStatus,
+  saveRevision,
+  saveNotesToDb,
+  deleteAllUserProgress,
+} from "../services/progressService";
+import { Toast, type ToastMessage } from "../components/common/Toast";
 
-const STORAGE_KEY = "dsa-lab-tracker:v1";
 const DATASET_STORAGE_KEY = "dsa-lab-tracker:dataset:v1";
+const THEME_STORAGE_KEY = "si-sheet:theme";
 const IMPORT_HISTORY_LIMIT = 10;
 
 export interface TrackerContextValue {
@@ -42,11 +50,15 @@ export interface TrackerContextValue {
   allPlatforms: string[];
   getProgress: (problemId: string) => UserProblemState;
 
+  // Loading & Error States for Progress
+  isLoadingProgress: boolean;
+  progressError: string | null;
+
   // Progress Mutations
-  updateStatus: (problemId: string, status: ProblemStatus) => void;
-  toggleRevision: (problemId: string) => void;
-  saveNotes: (problemId: string, notes: string) => void;
-  resetAllProgress: () => void;
+  updateStatus: (problemId: string, status: ProblemStatus) => Promise<void> | void;
+  toggleRevision: (problemId: string) => Promise<void> | void;
+  saveNotes: (problemId: string, notes: string) => Promise<void> | void;
+  resetAllProgress: () => Promise<void> | void;
   exportData: () => void;
   importData: (jsonData: string) => boolean;
   exportDataset: () => void;
@@ -191,14 +203,6 @@ function mergeProblems(baseProblems: Problem[], importedProblems: Problem[]): Pr
   return Array.from(byId.values());
 }
 
-function getKnownProblemIds(): Set<string> {
-  try {
-    return new Set(mergeProblems(PROBLEMS, readDatasetStore().importedProblems).map((problem) => problem.id));
-  } catch {
-    return new Set(PROBLEMS.map((problem) => problem.id));
-  }
-}
-
 function normalizeProblemState(value: unknown): UserProblemState {
   const item = value && typeof value === "object" ? (value as Partial<UserProblemState>) : {};
   return {
@@ -209,27 +213,6 @@ function normalizeProblemState(value: unknown): UserProblemState {
     revision: item.revision === true,
     notes: typeof item.notes === "string" ? item.notes : "",
     updatedAt: typeof item.updatedAt === "string" ? item.updatedAt : undefined,
-  };
-}
-
-function normalizeProgressStore(value: unknown): UserProgressStore {
-  const parsed = value && typeof value === "object" ? (value as Partial<UserProgressStore>) : {};
-  const sourceProgress =
-    parsed.progress && typeof parsed.progress === "object" && !Array.isArray(parsed.progress)
-      ? parsed.progress
-      : {};
-  const progress: UserProgressStore["progress"] = {};
-
-  for (const [problemId, state] of Object.entries(sourceProgress)) {
-    if (getKnownProblemIds().has(problemId)) {
-      progress[problemId] = normalizeProblemState(state);
-    }
-  }
-
-  return {
-    version: 1,
-    progress,
-    theme: parsed.theme === "light" ? "light" : "dark",
   };
 }
 
@@ -244,6 +227,8 @@ const initialFilters: FilterState = {
 };
 
 export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, showAuthPrompt } = useAuth();
+
   // Run dataset validation once on initialization in development
   useEffect(() => {
     if (import.meta.env.DEV) {
@@ -251,27 +236,36 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, []);
 
-  // Initialize store from localStorage
-  const [store, setStore] = useState<UserProgressStore>(() => {
+  // Theme preference is kept in localStorage as a harmless UI preference
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed && parsed.version === 1) {
-          return normalizeProgressStore(parsed);
-        }
+      const saved = localStorage.getItem(THEME_STORAGE_KEY);
+      if (saved === "light" || saved === "dark") {
+        return saved;
       }
-    } catch (e) {
-      console.warn("Failed to load user progress from localStorage, resetting to defaults:", e);
+    } catch {
+      // fallback
     }
-    return {
-      version: 1,
-      progress: {},
-      theme: "dark",
-    };
+    return "dark";
   });
 
-  // Active view tab
+  // Progress state: strictly Supabase-backed in-memory state.
+  // NO progress is read from or written to localStorage.
+  const [progress, setProgress] = useState<Record<string, UserProblemState>>({});
+  const [isLoadingProgress, setIsLoadingProgress] = useState<boolean>(false);
+  const [progressError, setProgressError] = useState<string | null>(null);
+
+  // Toast feedback state
+  const [toast, setToast] = useState<ToastMessage | null>(null);
+
+  const showToast = useCallback((message: string, type: "error" | "success" | "info" = "info") => {
+    setToast({ id: `${Date.now()}-${Math.random()}`, message, type });
+  }, []);
+
+  // Track the active user ID for which progress is loaded to guarantee logout & account-switch safety
+  const activeUserIdRef = useRef<string | null>(null);
+
+  // Active view tab & filters
   const [activeTab, setActiveTab] = useState<ViewTab>("dashboard");
   const [selectedProblemId, setSelectedProblemId] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterState>(initialFilters);
@@ -297,22 +291,22 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     [problems]
   );
 
-  // Sync to localStorage
+  // Sync theme to DOM and localStorage
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
-      // Update root dataset theme attribute
-      document.documentElement.setAttribute("data-theme", store.theme);
-      if (store.theme === "dark") {
+      localStorage.setItem(THEME_STORAGE_KEY, theme);
+      document.documentElement.setAttribute("data-theme", theme);
+      if (theme === "dark") {
         document.documentElement.classList.add("dark");
       } else {
         document.documentElement.classList.remove("dark");
       }
     } catch (e) {
-      console.error("Failed to persist tracker state to localStorage:", e);
+      console.error("Failed to persist theme preference to localStorage:", e);
     }
-  }, [store]);
+  }, [theme]);
 
+  // Sync imported dataset to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(DATASET_STORAGE_KEY, JSON.stringify(datasetStore));
@@ -321,14 +315,73 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [datasetStore]);
 
+  // Auth & Progress synchronization
+  useEffect(() => {
+    let isSubscribed = true;
+
+    // Scenario: Anonymous or Logged Out
+    if (!user) {
+      activeUserIdRef.current = null;
+      queueMicrotask(() => {
+        if (isSubscribed) {
+          setProgress((prev) => (Object.keys(prev).length === 0 ? prev : {}));
+          setIsLoadingProgress(false);
+          setProgressError(null);
+        }
+      });
+      return;
+    }
+
+    // Scenario: User account switched
+    if (activeUserIdRef.current !== user.id) {
+      activeUserIdRef.current = user.id;
+      queueMicrotask(() => {
+        if (isSubscribed) {
+          setProgress((prev) => (Object.keys(prev).length === 0 ? prev : {}));
+        }
+      });
+    }
+
+    const fetchProgress = async () => {
+      setIsLoadingProgress(true);
+      setProgressError(null);
+
+      try {
+        const { data, error } = await loadUserProgress(user.id);
+        if (!isSubscribed || activeUserIdRef.current !== user.id) return;
+
+        if (error) {
+          console.error("[TrackerContext] Error loading user progress from Supabase:", error);
+          setProgressError("Could not load progress from database.");
+          showToast("Failed to load your personal progress from Supabase.", "error");
+        } else {
+          setProgress(data);
+        }
+      } catch (err) {
+        if (!isSubscribed || activeUserIdRef.current !== user.id) return;
+        console.error("[TrackerContext] Unexpected exception loading progress:", err);
+        setProgressError("Failed to connect to progress service.");
+      } finally {
+        if (isSubscribed && activeUserIdRef.current === user.id) {
+          setIsLoadingProgress(false);
+        }
+      }
+    };
+
+    queueMicrotask(() => {
+      if (isSubscribed) {
+        void fetchProgress();
+      }
+    });
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [user, showToast]);
+
   const toggleTheme = useCallback(() => {
-    // Add transition class to enable smooth cross-fade
     document.documentElement.classList.add("is-theme-transitioning");
-    setStore((prev) => ({
-      ...prev,
-      theme: prev.theme === "dark" ? "light" : "dark",
-    }));
-    // Remove transition class after animation completes (300ms + buffer)
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
     setTimeout(() => {
       document.documentElement.classList.remove("is-theme-transitioning");
     }, 350);
@@ -336,96 +389,213 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const getProgress = useCallback(
     (problemId: string): UserProblemState => {
-      if (!store.progress || typeof store.progress !== "object") {
-        return defaultUserProgress;
-      }
-      const item = store.progress[problemId];
+      const item = progress[problemId];
       if (!item) return defaultUserProgress;
       return normalizeProblemState(item);
     },
-    [store.progress]
+    [progress]
   );
 
-  const updateStatus = useCallback((problemId: string, status: ProblemStatus) => {
-    setStore((prev) => {
-      const current = normalizeProblemState(prev.progress[problemId]);
-      return {
-        ...prev,
-        progress: {
-          ...prev.progress,
-          [problemId]: {
-            ...current,
-            status,
-            updatedAt: new Date().toISOString(),
-          },
-        },
-      };
-    });
-  }, []);
+  const updateStatus = useCallback(
+    async (problemId: string, status: ProblemStatus) => {
+      if (!user) {
+        showAuthPrompt();
+        return;
+      }
 
-  const toggleRevision = useCallback((problemId: string) => {
-    setStore((prev) => {
-      const current = normalizeProblemState(prev.progress[problemId]);
-      return {
-        ...prev,
-        progress: {
-          ...prev.progress,
-          [problemId]: {
-            ...current,
-            revision: !current.revision,
-            updatedAt: new Date().toISOString(),
-          },
-        },
-      };
-    });
-  }, []);
+      const problem = problems.find((p) => p.id === problemId);
+      const prevProgress = progress[problemId] ?? defaultUserProgress;
 
-  const saveNotes = useCallback((problemId: string, notes: string) => {
-    setStore((prev) => {
-      const current = normalizeProblemState(prev.progress[problemId]);
-      return {
-        ...prev,
-        progress: {
-          ...prev.progress,
-          [problemId]: {
-            ...current,
-            notes,
-            updatedAt: new Date().toISOString(),
-          },
-        },
+      // Optimistic update
+      const optimisticState: UserProblemState = {
+        ...prevProgress,
+        status,
+        updatedAt: new Date().toISOString(),
       };
-    });
-  }, []);
 
-  const resetAllProgress = useCallback(() => {
-    if (window.confirm("Are you sure you want to reset all problem progress and notes? This cannot be undone.")) {
-      setStore((prev) => ({
+      setProgress((prev) => ({
         ...prev,
-        progress: {},
+        [problemId]: optimisticState,
       }));
+
+      // Persist to Supabase
+      const { data, error } = await saveStatus(
+        user.id,
+        problemId,
+        status,
+        prevProgress,
+        problem?.url,
+        problem?.title
+      );
+
+      if (error) {
+        console.error(`[TrackerContext] Failed to save status for ${problemId}:`, error);
+        // Rollback
+        setProgress((prev) => ({
+          ...prev,
+          [problemId]: prevProgress,
+        }));
+        showToast("Failed to update status on server. Please try again.", "error");
+      } else if (data) {
+        // Sync confirmed server state
+        setProgress((prev) => ({
+          ...prev,
+          [problemId]: data,
+        }));
+      }
+    },
+    [user, problems, progress, showAuthPrompt, showToast]
+  );
+
+  const toggleRevision = useCallback(
+    async (problemId: string) => {
+      if (!user) {
+        showAuthPrompt();
+        return;
+      }
+
+      const problem = problems.find((p) => p.id === problemId);
+      const prevProgress = progress[problemId] ?? defaultUserProgress;
+      const nextRevision = !prevProgress.revision;
+
+      // Optimistic update
+      const optimisticState: UserProblemState = {
+        ...prevProgress,
+        revision: nextRevision,
+        updatedAt: new Date().toISOString(),
+      };
+
+      setProgress((prev) => ({
+        ...prev,
+        [problemId]: optimisticState,
+      }));
+
+      // Persist to Supabase
+      const { data, error } = await saveRevision(
+        user.id,
+        problemId,
+        nextRevision,
+        prevProgress,
+        problem?.url,
+        problem?.title
+      );
+
+      if (error) {
+        console.error(`[TrackerContext] Failed to save revision for ${problemId}:`, error);
+        // Rollback
+        setProgress((prev) => ({
+          ...prev,
+          [problemId]: prevProgress,
+        }));
+        showToast("Failed to update revision status. Please try again.", "error");
+      } else if (data) {
+        setProgress((prev) => ({
+          ...prev,
+          [problemId]: data,
+        }));
+      }
+    },
+    [user, problems, progress, showAuthPrompt, showToast]
+  );
+
+  const saveNotes = useCallback(
+    async (problemId: string, notes: string) => {
+      if (!user) {
+        showAuthPrompt();
+        return;
+      }
+
+      const problem = problems.find((p) => p.id === problemId);
+      const prevProgress = progress[problemId] ?? defaultUserProgress;
+
+      // Optimistic update
+      const optimisticState: UserProblemState = {
+        ...prevProgress,
+        notes,
+        updatedAt: new Date().toISOString(),
+      };
+
+      setProgress((prev) => ({
+        ...prev,
+        [problemId]: optimisticState,
+      }));
+
+      // Persist to Supabase
+      const { data, error } = await saveNotesToDb(
+        user.id,
+        problemId,
+        notes,
+        prevProgress,
+        problem?.url,
+        problem?.title
+      );
+
+      if (error) {
+        console.error(`[TrackerContext] Failed to save notes for ${problemId}:`, error);
+        // Rollback
+        setProgress((prev) => ({
+          ...prev,
+          [problemId]: prevProgress,
+        }));
+        showToast("Failed to save personal notes to server.", "error");
+      } else if (data) {
+        setProgress((prev) => ({
+          ...prev,
+          [problemId]: data,
+        }));
+      }
+    },
+    [user, problems, progress, showAuthPrompt, showToast]
+  );
+
+  const resetAllProgress = useCallback(async () => {
+    if (!user) {
+      showAuthPrompt();
+      return;
     }
-  }, []);
+
+    if (!window.confirm("Are you sure you want to reset all problem progress and notes? This cannot be undone.")) {
+      return;
+    }
+
+    const previousProgress = progress;
+    setProgress({});
+
+    const { error } = await deleteAllUserProgress(user.id);
+    if (error) {
+      console.error("[TrackerContext] Failed to reset progress in Supabase:", error);
+      setProgress(previousProgress);
+      showToast("Failed to reset progress. Please try again.", "error");
+    } else {
+      showToast("All personal progress has been reset.", "info");
+    }
+  }, [user, progress, showAuthPrompt, showToast]);
 
   const exportData = useCallback(() => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(store, null, 2));
+    const dataStr =
+      "data:text/json;charset=utf-8," +
+      encodeURIComponent(
+        JSON.stringify(
+          {
+            version: 1,
+            progress,
+            theme,
+          },
+          null,
+          2
+        )
+      );
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", dataStr);
     downloadAnchor.setAttribute("download", `dsa-tracker-backup-${new Date().toISOString().slice(0, 10)}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
-  }, [store]);
+  }, [progress, theme]);
 
-  const importData = useCallback((jsonData: string): boolean => {
-    try {
-      const parsed = JSON.parse(jsonData);
-      if (parsed && typeof parsed.progress === "object" && parsed.progress !== null && !Array.isArray(parsed.progress)) {
-        setStore(normalizeProgressStore(parsed));
-        return true;
-      }
-    } catch (e) {
-      console.error("Invalid backup file", e);
-    }
+  const importData = useCallback((): boolean => {
+    // In Phase 6, localStorage imports of progress are deprecated in favor of Supabase.
+    console.warn("[TrackerContext] importData is disabled. Supabase user_progress is the authoritative store.");
     return false;
   }, []);
 
@@ -573,7 +743,7 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setActiveTab("problems");
   }, []);
 
-  // Compute overall counts dynamically
+  // Compute overall counts dynamically from in-memory Supabase progress
   const {
     totalProblems,
     completedCount,
@@ -596,7 +766,7 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const updatedWithTime: { problem: Problem; updatedAt: string }[] = [];
 
     for (const p of problems) {
-      const state = normalizeProblemState(store.progress[p.id]);
+      const state = normalizeProblemState(progress[p.id]);
       if (state.status === "completed") {
         completed++;
       } else if (state.status === "in-progress") {
@@ -633,9 +803,9 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
       recentWorkedProblems: recentWorked,
       revisionProblems: revisionList,
     };
-  }, [problems, store.progress]);
+  }, [problems, progress]);
 
-  // Compute Topic Statistics dynamically
+  // Compute Topic Statistics dynamically from in-memory Supabase progress
   const topicStats: TopicStat[] = useMemo(() => {
     return allTopics.map((topic) => {
       const topicProblems = problems.filter((p) => p.topics.includes(topic));
@@ -645,7 +815,7 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
       let revision = 0;
 
       for (const p of topicProblems) {
-      const state = normalizeProblemState(store.progress[p.id]);
+        const state = normalizeProblemState(progress[p.id]);
         if (state.status === "completed") completed++;
         else if (state.status === "in-progress") inProgress++;
         else notStarted++;
@@ -662,9 +832,9 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
         revision,
       };
     }).sort((a, b) => b.total - a.total || a.topic.localeCompare(b.topic));
-  }, [allTopics, problems, store.progress]);
+  }, [allTopics, problems, progress]);
 
-  // Compute Lab Statistics dynamically
+  // Compute Lab Statistics dynamically from in-memory Supabase progress
   const labStats: LabStat[] = useMemo(() => {
     return allLabDates.map((date) => {
       const labProblems = problems.filter((p) => p.labDates.includes(date));
@@ -673,7 +843,7 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
       let notStarted = 0;
 
       for (const p of labProblems) {
-        const state = normalizeProblemState(store.progress[p.id]);
+        const state = normalizeProblemState(progress[p.id]);
         if (state.status === "completed") completed++;
         else if (state.status === "in-progress") inProgress++;
         else notStarted++;
@@ -688,10 +858,10 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
         problems: labProblems,
       };
     });
-  }, [allLabDates, problems, store.progress]);
+  }, [allLabDates, problems, progress]);
 
   const value: TrackerContextValue = {
-    theme: store.theme,
+    theme,
     toggleTheme,
     activeTab,
     setActiveTab,
@@ -702,6 +872,8 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     allLabDates,
     allPlatforms,
     getProgress,
+    isLoadingProgress,
+    progressError,
     updateStatus,
     toggleRevision,
     saveNotes,
@@ -731,5 +903,10 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     selectLabFilter,
   };
 
-  return <TrackerContext.Provider value={value}>{children}</TrackerContext.Provider>;
+  return (
+    <TrackerContext.Provider value={value}>
+      {children}
+      <Toast toast={toast} onClose={() => setToast(null)} />
+    </TrackerContext.Provider>
+  );
 };
