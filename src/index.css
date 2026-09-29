@@ -1142,6 +1142,54 @@ a {
   gap: 6px;
 }
 
+/* Confirm Dialog */
+.confirm-dialog {
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  width: 100%;
+  max-width: 380px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: scaleIn var(--transition-fast);
+}
+
+.confirm-dialog-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.confirm-dialog-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.confirm-dialog-body {
+  padding: 16px 14px;
+}
+
+.confirm-dialog-message {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.confirm-dialog-footer {
+  padding: 10px 14px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 /* Problem Detail Drawer */
 .drawer-overlay {
   position: fixed;
@@ -1795,7 +1843,8 @@ input:disabled {
     gap: 10px;
   }
 
-  .notes-dialog {
+  .notes-dialog,
+  .confirm-dialog {
     max-width: 98vw;
   }
 

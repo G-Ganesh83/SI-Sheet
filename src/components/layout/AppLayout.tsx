@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useTracker } from "../../context/useTracker";
 import { useAuth } from "../../context/useAuth";
 import { Sidebar } from "./Sidebar";
 import { ProblemDrawer } from "../common/ProblemDrawer";
+import { SignOutConfirmModal } from "../auth/SignOutConfirmModal";
 import type { ViewTab } from "../../types/tracker";
 import {
   LayoutDashboard,
@@ -25,6 +26,7 @@ const ADMIN_TABS: ViewTab[] = ["import", "users", "footer-clicks"];
 export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { activeTab, setActiveTab, theme, toggleTheme, revisionCount } = useTracker();
   const { user, profile, signOut, showAuthPrompt } = useAuth();
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const activeNavItemRef = useRef<HTMLButtonElement | null>(null);
 
   const isAdmin = profile?.role === "admin";
@@ -65,7 +67,7 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
   return (
     <div className="app-container">
       {/* Desktop Sidebar */}
-      <Sidebar />
+      <Sidebar onRequestSignOut={() => setShowSignOutConfirm(true)} />
 
       {/* Main Content Area */}
       <div className="main-content">
@@ -103,7 +105,7 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                 <button
                   type="button"
                   className="btn-icon"
-                  onClick={signOut}
+                  onClick={() => setShowSignOutConfirm(true)}
                   title="Sign out"
                   aria-label="Sign out"
                 >
@@ -161,6 +163,16 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
 
       {/* Slide-out problem inspector drawer */}
       <ProblemDrawer />
+
+      {/* Confirmation modal before signing out */}
+      <SignOutConfirmModal
+        isOpen={showSignOutConfirm}
+        onClose={() => setShowSignOutConfirm(false)}
+        onConfirm={async () => {
+          setShowSignOutConfirm(false);
+          await signOut();
+        }}
+      />
     </div>
   );
 };

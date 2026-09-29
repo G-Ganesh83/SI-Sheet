@@ -19,7 +19,11 @@ import {
 } from "lucide-react";
 import { recordFooterClick } from "../../services/adminService";
 
-export const Sidebar: React.FC = () => {
+interface SidebarProps {
+  onRequestSignOut?: () => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ onRequestSignOut }) => {
   const {
     activeTab,
     setActiveTab,
@@ -153,7 +157,7 @@ export const Sidebar: React.FC = () => {
           <button
             type="button"
             className="btn-icon sidebar-user-logout"
-            onClick={signOut}
+            onClick={onRequestSignOut ?? signOut}
             title="Sign out"
             aria-label="Sign out"
           >
