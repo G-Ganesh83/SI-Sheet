@@ -188,7 +188,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ onRequestSignOut }) => {
             className="creator-link"
             title="Ganesh on GitHub"
             aria-label="Ganesh on GitHub (opens in new tab)"
-            onClick={() => {
+            onClick={(e) => {
+              if (!user) {
+                e.preventDefault();
+                showAuthPrompt();
+                return;
+              }
               void recordFooterClick();
             }}
           >
