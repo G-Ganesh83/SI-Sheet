@@ -13,7 +13,7 @@ import type {
 import { PROBLEMS } from "../data/problems";
 import { runDevDatasetValidation } from "../data/validator";
 import { TrackerContext } from "./TrackerContextBase";
-import { DATASET_SCHEMA_VERSION } from "../data/importer";
+import { DATASET_SCHEMA_VERSION, normalizeTitle } from "../data/importer";
 import { useAuth } from "./useAuth";
 import {
   loadUserProgress,
@@ -63,9 +63,10 @@ export interface TrackerContextValue {
   importData: (jsonData: string) => boolean;
   exportDataset: () => void;
   importHistory: ImportHistoryEntry[];
+  showToast: (message: string, type?: "error" | "success" | "info") => void;
   /**
    * Refresh the session-local problem list from the Supabase catalog.
-   * Call this after a successful admin import to make newly added problems
+   * Call this after a successful admin import or edit to make updated problems
    * appear in the current session without a page reload.
    * Returns the number of newly merged catalog problems.
    */
@@ -197,12 +198,7 @@ function mergeProblems(baseProblems: Problem[], importedProblems: Problem[]): Pr
     byId.set(problem.id, problem);
   }
   for (const imported of importedProblems) {
-    const current = byId.get(imported.id);
-    byId.set(imported.id, {
-      ...(current ?? imported),
-      ...imported,
-      labDates: Array.from(new Set([...(current?.labDates ?? []), ...imported.labDates])),
-    });
+    byId.set(imported.id, imported);
   }
   return Array.from(byId.values());
 }
@@ -617,66 +613,72 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   /**
    * Refresh the session-local problem list by loading the Supabase catalog and
-   * merging any new problems (not in PROBLEMS) into the local datasetStore.
-   * Called by ImportView after a successful admin import.
+   * merging any new or edited problems into the local datasetStore.
+   * Called by ImportView after a successful import or by EditProblemModal after an edit.
    */
   const refreshImportedProblems = useCallback(async (): Promise<number> => {
     // Force a fresh fetch of the Supabase catalog
     invalidateCatalogCache();
     const catalogProblems = await getCatalogProblems(true);
 
-    // Build a set of URLs/IDs already in the hardcoded base dataset
-    const baseUrls = new Set(PROBLEMS.map((p) => p.url.trim().toLowerCase()));
-    const baseIds = new Set(PROBLEMS.map((p) => p.id));
-
-    // Find catalog problems not in base dataset
-    const existingImportedUrls = new Set(
-      datasetStore.importedProblems.map((p) => p.url.trim().toLowerCase())
-    );
-
-    // Build Problem-shaped objects for any catalog entries not already present
-    const newFromCatalog: Problem[] = [];
-    for (const dbProblem of catalogProblems) {
-      const urlKey = dbProblem.url.trim().toLowerCase();
-      if (baseUrls.has(urlKey) || existingImportedUrls.has(urlKey)) continue;
-      newFromCatalog.push({
-        id: dbProblem.id, // use Supabase UUID as id for new catalog problems
-        title: dbProblem.title,
-        url: dbProblem.url,
-        platform: dbProblem.platform ?? "Unknown",
-        topics: dbProblem.topics && dbProblem.topics.length > 0 ? dbProblem.topics : ["Imported"],
-        labDates: dbProblem.labDates && dbProblem.labDates.length > 0 ? dbProblem.labDates : [],
-      });
-      existingImportedUrls.add(urlKey);
-    }
-
-    if (newFromCatalog.length === 0 && baseIds.size === PROBLEMS.length) {
+    if (catalogProblems.length === 0) {
       return 0;
     }
 
-    if (newFromCatalog.length > 0) {
-      setDatasetStore((prev) => {
-        const merged = [...prev.importedProblems, ...newFromCatalog];
-        const operationId = `import-${Date.now()}`;
-        const entry: ImportHistoryEntry = {
-          id: operationId,
-          timestamp: new Date().toISOString(),
-          processed: newFromCatalog.length,
-          added: newFromCatalog.length,
-          updated: 0,
-          skipped: 0,
-        };
-        return {
-          version: DATASET_SCHEMA_VERSION,
-          importedProblems: merged,
-          history: [entry, ...prev.history].slice(0, IMPORT_HISTORY_LIMIT),
-          undo: null, // Supabase imports cannot be locally undone
-        };
-      });
+    // Build Problem-shaped objects from the Supabase catalog
+    const nextImported: Problem[] = [];
+    for (const dbProblem of catalogProblems) {
+      const urlKey = dbProblem.url.trim().toLowerCase();
+      // Match against base problems by URL or title
+      const baseProb = PROBLEMS.find(
+        (p) =>
+          p.url.trim().toLowerCase() === urlKey ||
+          normalizeTitle(p.title) === normalizeTitle(dbProblem.title)
+      );
+
+      if (baseProb) {
+        // If it's a base problem, check if its fields differ from hardcoded PROBLEMS
+        const isModified =
+          baseProb.title !== dbProblem.title ||
+          baseProb.platform !== (dbProblem.platform ?? "Unknown") ||
+          baseProb.url !== dbProblem.url ||
+          JSON.stringify(baseProb.topics) !== JSON.stringify(dbProblem.topics ?? []) ||
+          JSON.stringify(baseProb.labDates) !== JSON.stringify(dbProblem.labDates ?? []);
+
+        if (isModified) {
+          nextImported.push({
+            id: baseProb.id, // preserve base problem frontend ID
+            title: dbProblem.title,
+            url: dbProblem.url,
+            platform: dbProblem.platform ?? "Unknown",
+            topics: dbProblem.topics && dbProblem.topics.length > 0 ? dbProblem.topics : baseProb.topics,
+            labDates: dbProblem.labDates && dbProblem.labDates.length > 0 ? dbProblem.labDates : baseProb.labDates,
+          });
+        }
+      } else {
+        // Newly imported or catalog-only problem
+        nextImported.push({
+          id: dbProblem.id, // Supabase UUID
+          title: dbProblem.title,
+          url: dbProblem.url,
+          platform: dbProblem.platform ?? "Unknown",
+          topics: dbProblem.topics && dbProblem.topics.length > 0 ? dbProblem.topics : ["Imported"],
+          labDates: dbProblem.labDates && dbProblem.labDates.length > 0 ? dbProblem.labDates : [],
+        });
+      }
     }
 
-    return newFromCatalog.length;
-  }, [datasetStore.importedProblems]);
+    setDatasetStore((prev) => {
+      return {
+        version: DATASET_SCHEMA_VERSION,
+        importedProblems: nextImported,
+        history: prev.history,
+        undo: null,
+      };
+    });
+
+    return nextImported.length;
+  }, []);
 
   // Load any newly added shared catalog problems from Supabase on mount
   useEffect(() => {
@@ -850,6 +852,7 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     importData,
     exportDataset,
     importHistory: datasetStore.history,
+    showToast,
     refreshImportedProblems,
     totalProblems,
     completedCount,

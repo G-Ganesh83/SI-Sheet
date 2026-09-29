@@ -3,7 +3,8 @@ import { useTracker } from "../../context/useTracker";
 import { useAuth } from "../../context/useAuth";
 import { StatusBadge } from "./StatusBadge";
 import { RevisionCheckbox } from "./RevisionCheckbox";
-import { ExternalLink, X, Calendar, Tag, FileText, Check, Lock } from "lucide-react";
+import { ExternalLink, X, Calendar, Tag, FileText, Check, Lock, Pencil } from "lucide-react";
+import { EditProblemModal } from "../admin/EditProblemModal";
 
 export const ProblemDrawer: React.FC = () => {
   const {
@@ -17,13 +18,15 @@ export const ProblemDrawer: React.FC = () => {
     selectTopicFilter,
     selectLabFilter,
   } = useTracker();
-  const { user, showAuthPrompt } = useAuth();
+  const { user, profile, showAuthPrompt } = useAuth();
+  const isAdmin = profile?.role === "admin";
 
   const problem = problems.find((p) => p.id === selectedProblemId);
   const progress = selectedProblemId ? getProgress(selectedProblemId) : null;
 
   const [notes, setNotes] = useState("");
   const [isSaved, setIsSaved] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   useEffect(() => {
     // Only reset the local draft when a DIFFERENT problem is opened.
@@ -99,6 +102,27 @@ export const ProblemDrawer: React.FC = () => {
               <span style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>
                 ID: {problem.id}
               </span>
+              {isAdmin && (
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => setIsEditOpen(true)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 4,
+                    height: "22px",
+                    padding: "0 6px",
+                    fontSize: "11px",
+                    borderRadius: "var(--radius-sm)",
+                    marginLeft: "auto",
+                  }}
+                  title={`Edit ${problem.title}`}
+                >
+                  <Pencil size={11} />
+                  <span>Edit</span>
+                </button>
+              )}
             </div>
             <h2 style={{ fontSize: "17px", fontWeight: 700, color: "var(--text-primary)", lineHeight: 1.3 }}>
               {problem.title}
@@ -265,6 +289,15 @@ export const ProblemDrawer: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Admin Edit Problem Modal */}
+      {isAdmin && isEditOpen && (
+        <EditProblemModal
+          problem={problem}
+          isOpen={isEditOpen}
+          onClose={() => setIsEditOpen(false)}
+        />
+      )}
     </div>
   );
 };
