@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import type {
-  DatasetImportCandidate,
-  DatasetImportResult,
   DatasetStore,
   Problem,
   ProblemStatus,
@@ -13,9 +11,9 @@ import type {
   FilterState,
 } from "../types/tracker";
 import { PROBLEMS } from "../data/problems";
-import { runDevDatasetValidation, validateProblemDataset } from "../data/validator";
+import { runDevDatasetValidation } from "../data/validator";
 import { TrackerContext } from "./TrackerContextBase";
-import { countLabAssignments, DATASET_SCHEMA_VERSION } from "../data/importer";
+import { DATASET_SCHEMA_VERSION } from "../data/importer";
 import { useAuth } from "./useAuth";
 import {
   loadUserProgress,
@@ -23,6 +21,8 @@ import {
   saveRevision,
   saveNotesToDb,
   deleteAllUserProgress,
+  invalidateCatalogCache,
+  getCatalogProblems,
 } from "../services/progressService";
 import { Toast, type ToastMessage } from "../components/common/Toast";
 
@@ -63,9 +63,13 @@ export interface TrackerContextValue {
   importData: (jsonData: string) => boolean;
   exportDataset: () => void;
   importHistory: ImportHistoryEntry[];
-  canUndoLastImport: boolean;
-  applyDatasetImport: (candidates: DatasetImportCandidate[]) => DatasetImportResult;
-  undoLastImport: () => boolean;
+  /**
+   * Refresh the session-local problem list from the Supabase catalog.
+   * Call this after a successful admin import to make newly added problems
+   * appear in the current session without a page reload.
+   * Returns the number of newly merged catalog problems.
+   */
+  refreshImportedProblems: () => Promise<number>;
 
   // Computed Metrics
   totalProblems: number;
@@ -611,117 +615,81 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     downloadAnchor.remove();
   }, [problems]);
 
-  const applyDatasetImport = useCallback(
-    (candidates: DatasetImportCandidate[]): DatasetImportResult => {
-      const selected = candidates.filter((candidate) => candidate.selected);
-      const beforeProblems = problems;
-      const beforeImported = datasetStore.importedProblems;
-      const importedById = new Map(beforeImported.map((problem) => [problem.id, problem]));
-      const effectiveById = new Map(beforeProblems.map((problem) => [problem.id, problem]));
-      let added = 0;
-      let updated = 0;
-      let skipped = candidates.length - selected.length;
+  /**
+   * Refresh the session-local problem list by loading the Supabase catalog and
+   * merging any new problems (not in PROBLEMS) into the local datasetStore.
+   * Called by ImportView after a successful admin import.
+   */
+  const refreshImportedProblems = useCallback(async (): Promise<number> => {
+    // Force a fresh fetch of the Supabase catalog
+    invalidateCatalogCache();
+    const catalogProblems = await getCatalogProblems(true);
 
-      try {
-        for (const candidate of selected) {
-          if (candidate.action === "invalid" || candidate.action === "already-exists" || candidate.action === "possible-duplicate") {
-            skipped++;
-            continue;
-          }
+    // Build a set of URLs/IDs already in the hardcoded base dataset
+    const baseUrls = new Set(PROBLEMS.map((p) => p.url.trim().toLowerCase()));
+    const baseIds = new Set(PROBLEMS.map((p) => p.id));
 
-          if (candidate.action === "add-lab-date") {
-            const existing = effectiveById.get(candidate.existingProblemId ?? candidate.id);
-            if (!existing) {
-              skipped++;
-              continue;
-            }
-            const merged: Problem = {
-              ...existing,
-              labDates: Array.from(new Set([...existing.labDates, ...candidate.labDates])),
-            };
-            importedById.set(existing.id, merged);
-            effectiveById.set(existing.id, merged);
-            updated++;
-            continue;
-          }
+    // Find catalog problems not in base dataset
+    const existingImportedUrls = new Set(
+      datasetStore.importedProblems.map((p) => p.url.trim().toLowerCase())
+    );
 
-          const problem: Problem = {
-            id: candidate.id,
-            title: candidate.title,
-            url: candidate.url,
-            platform: candidate.platform,
-            topics: candidate.topics,
-            labDates: candidate.labDates,
-          };
-          importedById.set(problem.id, problem);
-          effectiveById.set(problem.id, problem);
-          added++;
-        }
+    // Build Problem-shaped objects for any catalog entries not already present
+    const newFromCatalog: Problem[] = [];
+    for (const dbProblem of catalogProblems) {
+      const urlKey = dbProblem.url.trim().toLowerCase();
+      if (baseUrls.has(urlKey) || existingImportedUrls.has(urlKey)) continue;
+      newFromCatalog.push({
+        id: dbProblem.id, // use Supabase UUID as id for new catalog problems
+        title: dbProblem.title,
+        url: dbProblem.url,
+        platform: dbProblem.platform ?? "Unknown",
+        topics: dbProblem.topics && dbProblem.topics.length > 0 ? dbProblem.topics : ["Imported"],
+        labDates: dbProblem.labDates && dbProblem.labDates.length > 0 ? dbProblem.labDates : [],
+      });
+      existingImportedUrls.add(urlKey);
+    }
 
-        const nextImported = Array.from(importedById.values());
-        const nextProblems = mergeProblems(PROBLEMS, nextImported);
-        const report = validateProblemDataset(nextProblems);
-        if (!report.isValid) {
-          return {
-            ok: false,
-            message: "Import failed safely. No partial changes were saved.",
-          };
-        }
+    if (newFromCatalog.length === 0 && baseIds.size === PROBLEMS.length) {
+      return 0;
+    }
 
+    if (newFromCatalog.length > 0) {
+      setDatasetStore((prev) => {
+        const merged = [...prev.importedProblems, ...newFromCatalog];
         const operationId = `import-${Date.now()}`;
         const entry: ImportHistoryEntry = {
           id: operationId,
           timestamp: new Date().toISOString(),
-          processed: candidates.length,
-          added,
-          updated,
-          skipped,
+          processed: newFromCatalog.length,
+          added: newFromCatalog.length,
+          updated: 0,
+          skipped: 0,
         };
-
-        setDatasetStore((prev) => ({
+        return {
           version: DATASET_SCHEMA_VERSION,
-          importedProblems: nextImported,
+          importedProblems: merged,
           history: [entry, ...prev.history].slice(0, IMPORT_HISTORY_LIMIT),
-          undo: {
-            operationId,
-            timestamp: entry.timestamp,
-            importedProblemsBefore: beforeImported,
-          },
-        }));
+          undo: null, // Supabase imports cannot be locally undone
+        };
+      });
+    }
 
-        return {
-          ok: true,
-          summary: {
-            operationId,
-            processed: candidates.length,
-            added,
-            updated,
-            skipped,
-            beforeUnique: beforeProblems.length,
-            afterUnique: nextProblems.length,
-            beforeAssignments: countLabAssignments(beforeProblems),
-            afterAssignments: countLabAssignments(nextProblems),
-          },
-        };
-      } catch {
-        return {
-          ok: false,
-          message: "Import failed safely. No partial changes were saved.",
-        };
+    return newFromCatalog.length;
+  }, [datasetStore.importedProblems]);
+
+  // Load any newly added shared catalog problems from Supabase on mount
+  useEffect(() => {
+    let isMounted = true;
+    queueMicrotask(() => {
+      if (isMounted) {
+        void refreshImportedProblems();
       }
-    },
-    [datasetStore.importedProblems, problems]
-  );
-
-  const undoLastImport = useCallback((): boolean => {
-    if (!datasetStore.undo) return false;
-    setDatasetStore((prev) => ({
-      ...prev,
-      importedProblems: prev.undo?.importedProblemsBefore ?? prev.importedProblems,
-      undo: null,
-    }));
-    return true;
-  }, [datasetStore.undo]);
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [refreshImportedProblems]);
 
   const resetFilters = useCallback(() => {
     setFilters(initialFilters);
@@ -882,9 +850,7 @@ export const TrackerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     importData,
     exportDataset,
     importHistory: datasetStore.history,
-    canUndoLastImport: Boolean(datasetStore.undo),
-    applyDatasetImport,
-    undoLastImport,
+    refreshImportedProblems,
     totalProblems,
     completedCount,
     inProgressCount,

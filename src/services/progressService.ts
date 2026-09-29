@@ -9,6 +9,18 @@ export interface DbProblem {
   url: string;
   title: string;
   platform?: string;
+  topics?: string[];
+  labDates?: string[];
+}
+
+const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+function isoToLabDate(iso: string): string {
+  const parts = iso.split("-");
+  if (parts.length !== 3) return iso;
+  const monthIdx = parseInt(parts[1], 10) - 1;
+  if (monthIdx < 0 || monthIdx > 11) return iso;
+  return `${parts[2].padStart(2, "0")} ${MONTH_NAMES[monthIdx]} ${parts[0]}`;
 }
 
 export interface DbUserProgressRow {
@@ -57,6 +69,19 @@ let titleToDbId = new Map<string, string>();
 let dbIdToProblem = new Map<string, DbProblem>();
 let dbIdToAppProblem = new Map<string, Problem>();
 
+/**
+ * Bust the in-memory catalog cache so the next call to getCatalogProblems()
+ * will re-fetch from Supabase. Call this after an admin writes new problems
+ * to the shared catalog.
+ */
+export function invalidateCatalogCache(): void {
+  cachedCatalogProblems = null;
+  urlToDbId = new Map();
+  titleToDbId = new Map();
+  dbIdToProblem = new Map();
+  dbIdToAppProblem = new Map();
+}
+
 /** Normalize string for loose title matching */
 function normalizeTitle(str: string): string {
   return str.toLowerCase().replace(/[^a-z0-9]/g, "").trim();
@@ -64,6 +89,8 @@ function normalizeTitle(str: string): string {
 
 /**
  * Fetch problem catalog from Supabase and build bidirectional lookup maps.
+ * Fetches associated topics and lab dates so newly imported catalog problems
+ * can be rendered fully in the UI.
  */
 export async function getCatalogProblems(forceRefresh = false): Promise<DbProblem[]> {
   if (cachedCatalogProblems && !forceRefresh) {
@@ -76,17 +103,64 @@ export async function getCatalogProblems(forceRefresh = false): Promise<DbProble
 
   try {
     const supabase = getSupabaseClient();
-    const { data, error } = await supabase
+    
+    // Attempt enriched query with topic and lab joins
+    let rawProblems: any[] | null = null;
+    const { data: enrichedData, error: enrichedError } = await supabase
       .from("problems")
-      .select("id, url, title, platform");
+      .select(`
+        id,
+        url,
+        title,
+        platform,
+        problem_topics (
+          topics (
+            name
+          )
+        ),
+        lab_problems (
+          labs (
+            lab_date
+          )
+        )
+      `);
 
-    if (error) {
-      console.warn("[progressService] Could not fetch catalog problems from Supabase:", error.message);
-      return cachedCatalogProblems || [];
+    if (enrichedError) {
+      console.warn("[progressService] Enriched catalog fetch warning, falling back to simple select:", enrichedError.message);
+      const { data: simpleData, error: simpleError } = await supabase
+        .from("problems")
+        .select("id, url, title, platform");
+
+      if (simpleError) {
+        console.warn("[progressService] Could not fetch catalog problems from Supabase:", simpleError.message);
+        return cachedCatalogProblems || [];
+      }
+      rawProblems = simpleData;
+    } else {
+      rawProblems = enrichedData;
     }
 
-    if (data && Array.isArray(data)) {
-      cachedCatalogProblems = data as DbProblem[];
+    if (rawProblems && Array.isArray(rawProblems)) {
+      const parsed: DbProblem[] = rawProblems.map((p: any) => {
+        const topics = (p.problem_topics || [])
+          .map((pt: any) => pt.topics?.name)
+          .filter((name: any): name is string => typeof name === "string" && Boolean(name));
+
+        const labDates = (p.lab_problems || [])
+          .map((lp: any) => (lp.labs?.lab_date ? isoToLabDate(lp.labs.lab_date) : null))
+          .filter((d: any): d is string => typeof d === "string" && Boolean(d));
+
+        return {
+          id: p.id,
+          url: p.url,
+          title: p.title,
+          platform: p.platform ?? "Unknown",
+          topics,
+          labDates,
+        };
+      });
+
+      cachedCatalogProblems = parsed;
       urlToDbId.clear();
       titleToDbId.clear();
       dbIdToProblem.clear();

@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from "react";
-import { Download, RotateCcw, Search, Upload, X } from "lucide-react";
+import { Download, Search, Upload, X } from "lucide-react";
 import { useTracker } from "../../context/useTracker";
 import type { DatasetImportCandidate, Problem } from "../../types/tracker";
+import { adminImportToCatalog } from "../../services/adminImportService";
 import {
   buildImportCandidate,
   extractUrls,
@@ -61,10 +62,8 @@ export const ImportView: React.FC = () => {
   const {
     problems,
     allTopics,
-    applyDatasetImport,
     importHistory,
-    canUndoLastImport,
-    undoLastImport,
+    refreshImportedProblems,
     exportDataset,
   } = useTracker();
 
@@ -75,6 +74,7 @@ export const ImportView: React.FC = () => {
   const [manual, setManual] = useState(emptyManual);
   const [candidates, setCandidates] = useState<DatasetImportCandidate[]>([]);
   const [isExtracting, setIsExtracting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const [message, setMessage] = useState("");
   const [summary, setSummary] = useState<string>("");
   const [existingSearch, setExistingSearch] = useState("");
@@ -182,7 +182,7 @@ export const ImportView: React.FC = () => {
     setCandidates([candidate]);
   };
 
-  const confirmImport = () => {
+  const confirmImport = async () => {
     setMessage("");
     setSummary("");
     if (selectedImportable.length === 0) {
@@ -190,17 +190,36 @@ export const ImportView: React.FC = () => {
       return;
     }
 
-    const result = applyDatasetImport(candidates);
-    if (!result.ok || !result.summary) {
-      setMessage(result.message ?? "Import failed safely. No partial changes were saved.");
-      return;
-    }
+    setIsImporting(true);
+    try {
+      const response = await adminImportToCatalog(candidates);
+      if (!response.ok) {
+        const failureMsg = response.error || "Import failed. No changes were made to the shared catalog.";
+        setMessage(response.details ? `${failureMsg} (${response.details})` : failureMsg);
+        return;
+      }
 
-    const s = result.summary;
-    setSummary(
-      `Import complete. ${s.processed} processed, ${s.added} added, ${s.updated} updated, ${s.skipped} skipped. Dataset: ${s.beforeUnique} -> ${s.afterUnique} problems. Lab assignments: ${s.beforeAssignments} -> ${s.afterAssignments}.`
-    );
-    setCandidates([]);
+      // Refresh catalog and merge in TrackerContext
+      await refreshImportedProblems();
+
+      const addedCount = response.added ?? 0;
+      const updatedCount = response.updated ?? 0;
+      let summaryText = "Import completed successfully.";
+      if (addedCount > 0 || updatedCount > 0) {
+        summaryText += ` (${addedCount} added, ${updatedCount} updated)`;
+      }
+      setSummary(summaryText);
+      setCandidates([]);
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setMessage(
+        errMsg.includes("Import failed")
+          ? errMsg
+          : `Import failed. No changes were made to the shared catalog. (${errMsg})`
+      );
+    } finally {
+      setIsImporting(false);
+    }
   };
 
   return (
@@ -213,24 +232,10 @@ export const ImportView: React.FC = () => {
               <Download size={13} />
               <span>Export Dataset</span>
             </button>
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={() => {
-                if (undoLastImport()) {
-                  setSummary("Last import was undone. Dataset restored to its previous imported state.");
-                }
-              }}
-              disabled={!canUndoLastImport}
-              title={canUndoLastImport ? "Undo the most recent import" : "No recent import to undo"}
-            >
-              <RotateCcw size={13} />
-              <span>Undo Last Import</span>
-            </button>
           </div>
         </div>
         <p className="view-subtitle">
-          Add web or manual problem records with validation, duplicate detection, preview, and confirmation
+          Admin tool: Import problems directly into the shared Supabase catalog with validation, duplicate detection, and live synchronization.
         </p>
       </div>
 
@@ -423,8 +428,13 @@ export const ImportView: React.FC = () => {
                 aria-label="Search existing problems"
               />
             </label>
-            <button type="button" className="btn-primary" onClick={confirmImport}>
-              Confirm Import
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={() => void confirmImport()}
+              disabled={isImporting || selectedImportable.length === 0}
+            >
+              {isImporting ? "Importing to Catalog..." : "Confirm Import"}
             </button>
           </div>
 
