@@ -145,15 +145,17 @@ export const FooterClicksView: React.FC = () => {
   // Non-admin guard
   if (!user || !isAdmin) {
     return (
-      <div className="admin-page-container">
-        <div className="empty-state" style={{ marginTop: 60 }}>
-          <div className="empty-state-icon">
-            <AlertTriangle size={32} />
+      <div className="view-container">
+        <div className="admin-page-container">
+          <div className="empty-state" style={{ marginTop: 60 }}>
+            <div className="empty-state-icon">
+              <AlertTriangle size={32} />
+            </div>
+            <h2 className="empty-state-title">Access Denied</h2>
+            <p className="empty-state-desc">
+              You do not have administrative privileges to access this area.
+            </p>
           </div>
-          <h2 className="empty-state-title">Access Denied</h2>
-          <p className="empty-state-desc">
-            You do not have administrative privileges to access this area.
-          </p>
         </div>
       </div>
     );
@@ -176,7 +178,8 @@ export const FooterClicksView: React.FC = () => {
   };
 
   return (
-    <div className="admin-page-container">
+    <div className="view-container">
+      <div className="admin-page-container">
       {/* Header */}
       <div className="admin-page-header">
         <div>
@@ -432,6 +435,7 @@ export const FooterClicksView: React.FC = () => {
           )}
         </div>
       )}
+      </div>
     </div>
   );
 };
