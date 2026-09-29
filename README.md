@@ -1,176 +1,168 @@
 # SI Sheet
 
-A clean, local-first DSA lab tracker for Smart Interviews and LeetCode practice. SI Sheet helps you keep one organized place for assigned problems, topic progress, lab dates, revision planning, notes, and imported problem links.
+A modern, local-first DSA problem tracker and lab milestone companion for Smart Interviews and LeetCode practice. SI Sheet provides a high-density, Linear/Raycast-inspired workspace to track assigned lab problems, review tricky concepts, record personal notes, and sync progress seamlessly across devices.
 
 ![SI Sheet](public/favicon.png)
 
-## What It Does
+---
 
-SI Sheet is built for students who want a simple way to track DSA lab progress without depending on an account or backend. Your progress is stored in the browser, so the app stays fast and private.
+## Features
 
-With SI Sheet you can:
+### 🚀 Core Capabilities
+- **Local-First & Cloud-Synced**: Practice anonymously with instant `localStorage` persistence, or sign in with Google via Supabase to sync progress, notes, and revision queues across all your devices.
+- **Problem Status Tracking**: Toggle problem states instantly across `Not Started`, `In Progress`, and `Completed`.
+- **Revision Queue**: Star difficult or pattern-rich problems for focused revision before tests, interviews, or contests.
+- **Personal Problem Notes**: Store inline notes, time/space complexity insights, and edge cases per problem with a dedicated modal and problem drawer.
+- **Lab Milestones & Topic Grouping**: Follow assigned lab schedules (Lab 01 – Lab 09) and assess topic-by-topic DSA mastery.
+- **Problem Detail Drawer**: Slide-out inspector drawer providing complete problem metadata, topic tags, lab dates, direct external links, and editable notes.
+- **Flexible Problem Import**: Batch import problems via URL parsing, pasted metadata, or manual entry with duplicate detection, lab date merging, and validation.
+- **Curated Dataset & Export**: Ships with 52 curated DSA problems across 9 lab milestones, with full dataset export capabilities.
+- **Polished Developer Aesthetic**: Engineered with dark and light themes, smooth micro-interactions, responsive desktop sidebar, and mobile-friendly navigation.
+- **Safe Sign-Out UX**: Confirmation dialog before logout to prevent accidental session termination.
+- **Admin Suite**: Role-gated administration dashboard with user management, problem importer, and footer click analytics.
 
-- Track each problem as `Not Started`, `In Progress`, or `Completed`.
-- Mark difficult problems for revision.
-- Add notes for individual problems.
-- Filter problems by topic, lab date, platform, status, and revision state.
-- View topic-wise and lab-wise progress.
-- Import new problems from URLs, pasted metadata, or manual entry.
-- Detect duplicates before importing new records.
-- Export progress and dataset backups.
-- Switch between dark and light themes.
+---
 
-## Main Features
+## Views & Workflow
 
-### Dashboard
+- **Dashboard**: High-level metrics showing overall completion percentage, active problems, revision backlog, and topic progress bars.
+- **Problems**: Searchable, filterable table with quick filters by platform, topic, status, lab milestone, and revision flag.
+- **Topics**: Hierarchical view breaking down problem distribution and completion rates across data structures and algorithms.
+- **Labs**: Milestone-based view structured around college lab sessions and scheduled assignments.
+- **Revision**: Dedicated queue highlighting problems flagged for review with badge indicators.
+- **Import (Admin)**: Add and validate new problem records or append lab dates with live preview and duplicate detection.
+- **Users (Admin)**: View registered users, roles, and account activity.
+- **Footer Clicks (Admin)**: Monitor outbound interactions and footer link analytics.
 
-The dashboard gives a quick overview of total problems, completion percentage, active problems, revision queue, and topic progress.
-
-### Problems View
-
-Browse the complete problem list with filters and sorting. Each row shows the platform, topics, lab dates, status, revision flag, notes, and external problem link.
-
-### Topics View
-
-Understand which DSA topics need more attention. SI Sheet groups problems by topic and shows completion status for each area.
-
-### Labs View
-
-Review problems according to assigned lab dates. This is useful when following a college or Smart Interviews lab schedule.
-
-### Revision Queue
-
-Keep tricky problems in one place so you can revisit them before tests, interviews, or contests.
-
-### Problem Import
-
-Add problems without editing source code manually. The import workflow supports:
-
-- URL-based import
-- Pasted problem metadata
-- Manual problem entry
-- Preview before saving
-- Duplicate detection
-- Add-lab-date handling for existing problems
-- Undo last import
-- Dataset export
+---
 
 ## Tech Stack
 
-- React
-- TypeScript
-- Vite
-- Lucide React icons
-- Oxlint
-- Browser `localStorage` for persistence
+- **Framework**: [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
+- **Bundler & Tooling**: [Vite](https://vitejs.dev/)
+- **Backend & Auth**: [Supabase](https://supabase.com/) (Google OAuth, PostgreSQL database, Row Level Security)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Styling**: Vanilla CSS Design System with CSS variables (Dark/Light themes, responsive layout)
+- **Analytics**: [@vercel/analytics](https://vercel.com/analytics)
+- **Linter**: [Oxlint](https://oxc.rs/)
+
+---
 
 ## Getting Started
 
 ### Prerequisites
+- [Node.js](https://nodejs.org/) (v18 or higher recommended)
+- [npm](https://www.npmjs.com/)
 
-Install Node.js and npm on your machine.
-
-### Installation
+### 1. Clone & Install Dependencies
 
 ```bash
+git clone https://github.com/G-Ganesh83/SI-Sheet.git
+cd SI-Sheet
 npm install
 ```
 
-### Run Locally
+### 2. Configure Environment Variables
+
+Copy the example environment file:
+
+```bash
+cp .env.example .env
+```
+
+Open `.env` and fill in your Supabase credentials:
+
+```env
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your-supabase-publishable-key
+```
+
+> **Note**: Even without Supabase credentials configured, SI Sheet will gracefully run in local-first mode using browser `localStorage`.
+
+### 3. Run Locally
 
 ```bash
 npm run dev
 ```
 
-Open the local URL shown in the terminal, usually:
+Visit `http://localhost:5173` in your browser.
 
-```text
-http://localhost:5173
-```
+---
 
-### Build for Production
+## Available Scripts
 
-```bash
-npm run build
-```
+| Command | Description |
+| :--- | :--- |
+| `npm run dev` | Starts the Vite development server with HMR |
+| `npm run build` | Compiles TypeScript (`tsc -b`) and bundles for production (`vite build`) |
+| `npm run preview` | Previews the production build locally |
+| `npm run lint` | Runs `oxlint` for fast code linting |
 
-### Preview Production Build
-
-```bash
-npm run preview
-```
-
-### Lint
-
-```bash
-npm run lint
-```
+---
 
 ## Project Structure
 
 ```text
 SI-Sheet/
-├── public/              # Favicons and static assets
+├── public/                     # Static assets & favicons
 ├── src/
-│   ├── components/      # UI views and reusable components
-│   ├── context/         # Tracker state and localStorage persistence
-│   ├── data/            # Base problem dataset, importer, validator
-│   ├── types/           # Shared TypeScript types
-│   ├── App.tsx          # Main app routing by active view
-│   └── main.tsx         # React entry point
-├── index.html           # App title, favicon, meta tags
-├── package.json         # Scripts and dependencies
-└── README.md            # Project documentation
+│   ├── assets/                 # SVGs and brand assets
+│   ├── components/
+│   │   ├── admin/              # Admin views (Users, Footer Clicks)
+│   │   ├── auth/               # Sign-in modal, loading screens, sign-out confirm popup
+│   │   ├── common/             # Reusable UI (Drawer, Notes Modal, Badges, Toasts)
+│   │   ├── dashboard/          # Summary metrics & topic progress cards
+│   │   ├── import/             # Problem import workflow & preview
+│   │   ├── labs/               # Milestone-based lab views
+│   │   ├── layout/             # Desktop Sidebar & responsive AppLayout
+│   │   ├── problems/           # Problems table, row items, and filter bar
+│   │   ├── revision/           # Revision queue view
+│   │   └── topics/             # Topic breakdown view
+│   ├── context/                # AuthContext (Supabase) & TrackerContext (State & LocalStorage)
+│   ├── data/                   # Default problem dataset, parser & schema validator
+│   ├── lib/                    # Supabase client initialization
+│   ├── services/               # Supabase data services (progressService, adminService)
+│   ├── types/                  # TypeScript interfaces (auth, tracker, admin)
+│   ├── App.tsx                 # Root layout & view router
+│   ├── index.css               # Design system, CSS variables & theming
+│   └── main.tsx                # Application entry point
+├── supabase/                   # Supabase configuration, migrations, and seed data
+│   ├── migrations/             # SQL schema migrations & RLS policies
+│   └── seed.sql                # Initial database seed
+├── .env.example                # Example environment variables template
+├── package.json                # Project dependencies and npm scripts
+└── README.md                   # Project documentation
 ```
 
-## Data and Privacy
+---
 
-SI Sheet is local-first. It does not require login, a database, or an API key.
+## Data Synchronization & Privacy
 
-The app stores data in your browser using `localStorage`:
+1. **Anonymous / Guest Mode**:
+   - Stored in browser `localStorage`.
+   - No login, credentials, or cookies required.
+   - Progress, notes, revision items, and theme preferences remain completely local.
 
-- Problem progress
-- Notes
-- Revision flags
-- Theme preference
-- Imported dataset records
-- Import history
+2. **Authenticated Mode (Supabase)**:
+   - Signs in using Google OAuth via Supabase Auth.
+   - Seamlessly merges any prior offline progress upon login.
+   - Automatically synchronizes problem status, notes, revision flags, and timestamps to PostgreSQL via Row Level Security (RLS).
+   - Safe sign-out confirmation ensures progress is never abandoned by mistake.
 
-Because the data is stored locally, clearing browser storage can remove your progress. Use the export options inside the app to keep backups.
-
-## Environment Variables
-
-No `.env` file is required for the current version.
-
-If future features need API keys or external services, create a local `.env` file and expose only Vite-safe variables prefixed with `VITE_`.
-
-Example:
-
-```env
-VITE_API_URL=https://example.com
-```
-
-Do not commit real secrets. The `.gitignore` already excludes `.env` files.
+---
 
 ## Deployment
 
-This is a static Vite app. You can deploy the production output from the `dist/` folder to services like Vercel, Netlify, GitHub Pages, or any static hosting provider.
-
-Build first:
+Deployable as a static web app to [Vercel](https://vercel.com/), [Netlify](https://www.netlify.com/), or any static hosting service:
 
 ```bash
 npm run build
 ```
 
-Then deploy the generated `dist/` directory.
+Configure your production environment variables (`VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`) in your hosting provider's dashboard, with the output directory set to `dist`.
 
-## Notes for Contributors
-
-- Keep progress-related data separate from the base problem dataset.
-- Validate dataset changes before release.
-- Avoid committing `node_modules/`, `dist/`, `.env`, or machine-specific files.
-- Prefer small, focused changes that match the existing UI style.
+---
 
 ## License
 
-This project is currently private/personal. Add a license file if you plan to publish it publicly.
+This project is created for personal and educational use.
