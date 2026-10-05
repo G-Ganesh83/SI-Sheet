@@ -1,6 +1,6 @@
 # SI Sheet
 
-A modern, local-first DSA problem tracker and lab milestone companion for Smart Interviews and LeetCode practice. SI Sheet provides a high-density, Linear/Raycast-inspired workspace to track assigned lab problems, review tricky concepts, record personal notes, and sync progress seamlessly across devices.
+A modern, cloud-synced DSA problem tracker and lab milestone companion for Smart Interviews and LeetCode practice. SI Sheet provides a high-density, Linear/Raycast-inspired workspace to track assigned lab problems, review tricky concepts, record personal notes, and sync progress seamlessly across devices via Supabase.
 
 ![SI Sheet](public/favicon.png)
 
@@ -9,17 +9,17 @@ A modern, local-first DSA problem tracker and lab milestone companion for Smart 
 ## Features
 
 ### 🚀 Core Capabilities
-- **Local-First & Cloud-Synced**: Practice anonymously with instant `localStorage` persistence, or sign in with Google via Supabase to sync progress, notes, and revision queues across all your devices.
+- **Cloud-Synced & Real-Time**: Sign in with Google via Supabase to securely track and sync problem status, inline notes, and revision queues across all your devices with PostgreSQL and Row Level Security (RLS).
 - **Problem Status Tracking**: Toggle problem states instantly across `Not Started`, `In Progress`, and `Completed`.
 - **Revision Queue**: Star difficult or pattern-rich problems for focused revision before tests, interviews, or contests.
 - **Personal Problem Notes**: Store inline notes, time/space complexity insights, and edge cases per problem with a dedicated modal and problem drawer.
 - **Lab Milestones & Topic Grouping**: Follow assigned lab schedules (Lab 01 – Lab 09) and assess topic-by-topic DSA mastery.
 - **Problem Detail Drawer**: Slide-out inspector drawer providing complete problem metadata, topic tags, lab dates, direct external links, and editable notes.
-- **Flexible Problem Import**: Batch import problems via URL parsing, pasted metadata, or manual entry with duplicate detection, lab date merging, and validation.
-- **Curated Dataset & Export**: Ships with 52 curated DSA problems across 9 lab milestones, with full dataset export capabilities.
+- **Admin Catalog Management**: Admin-gated catalog suite with atomic problem import, duplicate detection, lab date merging, and catalog editing.
+- **Curated Dataset & Export**: 52+ curated DSA problems across 9 lab milestones, with full dataset export capabilities.
 - **Polished Developer Aesthetic**: Engineered with dark and light themes, smooth micro-interactions, responsive desktop sidebar, and mobile-friendly navigation.
 - **Safe Sign-Out UX**: Confirmation dialog before logout to prevent accidental session termination.
-- **Admin Suite**: Role-gated administration dashboard with user management, problem importer, and footer click analytics.
+- **Admin Suite**: Role-gated administration dashboard with user management, problem importer/editor, and footer click analytics.
 
 ---
 
@@ -77,7 +77,7 @@ VITE_SUPABASE_URL=https://your-project-id.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=your-supabase-publishable-key
 ```
 
-> **Note**: Even without Supabase credentials configured, SI Sheet will gracefully run in local-first mode using browser `localStorage`.
+> **Note**: A Supabase project is required for Google OAuth authentication, problem catalog access, and progress persistence.
 
 ### 3. Run Locally
 
@@ -118,10 +118,10 @@ SI-Sheet/
 │   │   ├── problems/           # Problems table, row items, and filter bar
 │   │   ├── revision/           # Revision queue view
 │   │   └── topics/             # Topic breakdown view
-│   ├── context/                # AuthContext (Supabase) & TrackerContext (State & LocalStorage)
+│   ├── context/                # AuthContext (Supabase Auth) & TrackerContext (State Management & Supabase Sync)
 │   ├── data/                   # Default problem dataset, parser & schema validator
 │   ├── lib/                    # Supabase client initialization
-│   ├── services/               # Supabase data services (progressService, adminService)
+│   ├── services/               # Supabase data services (progressService, adminService, adminEditService)
 │   ├── types/                  # TypeScript interfaces (auth, tracker, admin)
 │   ├── App.tsx                 # Root layout & view router
 │   ├── index.css               # Design system, CSS variables & theming
@@ -136,18 +136,24 @@ SI-Sheet/
 
 ---
 
-## Data Synchronization & Privacy
+## Data Architecture & Security
 
-1. **Anonymous / Guest Mode**:
-   - Stored in browser `localStorage`.
-   - No login, credentials, or cookies required.
-   - Progress, notes, revision items, and theme preferences remain completely local.
-
-2. **Authenticated Mode (Supabase)**:
+1. **Authentication (Supabase Auth)**:
    - Signs in using Google OAuth via Supabase Auth.
-   - Seamlessly merges any prior offline progress upon login.
-   - Automatically synchronizes problem status, notes, revision flags, and timestamps to PostgreSQL via Row Level Security (RLS).
-   - Safe sign-out confirmation ensures progress is never abandoned by mistake.
+   - User sessions are handled with JWTs, and active user switching/logout cleanly flushes in-memory progress.
+   - Safe sign-out confirmation modal prevents accidental session termination.
+
+2. **Cloud Persistence (PostgreSQL & RLS)**:
+   - User progress (problem status, inline notes, revision star flags, updated timestamps) is strictly persisted in PostgreSQL tables.
+   - Protected by Row Level Security (RLS) policies ensuring users can only read and write their own problem progress records.
+   - Zero problem progress is stored in browser `localStorage`.
+
+3. **Problem Catalog & Admin Management**:
+   - Centralized DSA problem catalog hosted on Supabase with public read access.
+   - Role-gated administration permissions (`is_admin`) enable admins to edit catalog problems, batch-import new entries atomically, and view analytics.
+
+4. **Client Preferences**:
+   - UI theme preference (dark/light) is stored locally in the browser to prevent flash-of-unstyled-content (FOUC) on initial load.
 
 ---
 
