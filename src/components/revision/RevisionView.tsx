@@ -14,51 +14,25 @@ export const RevisionView: React.FC = () => {
         <div className="view-title-row">
           <h1 className="view-title">Revision Queue</h1>
           {user ? (
-            <div
-              style={{
-                fontSize: "12px",
-                fontFamily: "var(--font-mono)",
-                color: "var(--revision-color)",
-                background: "var(--revision-bg)",
-                border: "1px solid var(--revision-border)",
-                padding: "4px 10px",
-                borderRadius: "var(--radius-sm)",
-              }}
-            >
-              {revisionProblems.length} {revisionProblems.length === 1 ? "problem" : "problems"} marked for revision
+            <div className="revision-pill-badge">
+              <RotateCcw size={12} />
+              <span>
+                {revisionProblems.length} {revisionProblems.length === 1 ? "problem" : "problems"} marked for revision
+              </span>
             </div>
           ) : (
-            <div
-              style={{
-                fontSize: "12px",
-                fontFamily: "var(--font-mono)",
-                color: "var(--text-muted)",
-                background: "var(--bg-subtle)",
-                border: "1px solid var(--border-subtle)",
-                padding: "4px 10px",
-                borderRadius: "var(--radius-sm)",
-              }}
-            >
-              Personal Tracking
+            <div className="revision-pill-badge muted">
+              <span>Personal Tracking</span>
             </div>
           )}
         </div>
         <p className="view-subtitle">
-          Problems flagged for conceptual re-evaluation, alternative approaches, or interview drills
+          These are the problems I specifically want to revisit — flagged for conceptual re-evaluation, alternative approaches, or interview drills
         </p>
       </div>
 
       {!user ? (
-        <div
-          className="empty-state"
-          style={{
-            backgroundColor: "var(--bg-card)",
-            border: "1px solid var(--border-subtle)",
-            borderRadius: "var(--radius-md)",
-            marginTop: 8,
-            padding: "36px 20px",
-          }}
-        >
+        <div className="empty-state empty-state-card">
           <RotateCcw size={28} className="empty-state-icon" style={{ color: "var(--revision-color)" }} />
           <h3 className="empty-state-title">Sign in to track revision problems</h3>
           <p className="empty-state-desc">
@@ -96,16 +70,7 @@ export const RevisionView: React.FC = () => {
           </table>
         </div>
       ) : (
-        <div
-          className="empty-state"
-          style={{
-            backgroundColor: "var(--bg-card)",
-            border: "1px solid var(--border-subtle)",
-            borderRadius: "var(--radius-md)",
-            marginTop: 8,
-            padding: "36px 20px",
-          }}
-        >
+        <div className="empty-state empty-state-card">
           <RotateCcw size={28} className="empty-state-icon" style={{ color: "var(--revision-color)" }} />
           <h3 className="empty-state-title">No problems marked for revision.</h3>
           <p className="empty-state-desc">

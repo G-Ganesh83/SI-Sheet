@@ -33,44 +33,30 @@ export const TopicsView: React.FC = () => {
       </div>
 
       {/* Topics Grid */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-          gap: 10,
-          marginBottom: 24,
-        }}
-      >
+      <div className="overview-grid">
         {topicStats.map((stat) => {
           const isSelected = stat.topic === selectedTopic;
           const percentage = stat.total > 0 ? Math.round((stat.completed / stat.total) * 100) : 0;
           return (
             <div
               key={stat.topic}
+              role="button"
+              tabIndex={0}
+              aria-pressed={isSelected}
+              className={`overview-card ${isSelected ? "selected" : ""}`}
               onClick={() => setSelectedTopic(stat.topic)}
-              style={{
-                backgroundColor: isSelected ? "var(--bg-card-hover)" : "var(--bg-card)",
-                border: `1px solid ${isSelected ? "var(--accent)" : "var(--border-subtle)"}`,
-                borderRadius: "var(--radius-md)",
-                padding: "12px 14px",
-                cursor: "pointer",
-                transition: "all var(--transition-fast)",
-                display: "flex",
-                flexDirection: "column",
-                gap: 8,
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setSelectedTopic(stat.topic);
+                }
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span
-                  style={{
-                    fontWeight: 600,
-                    fontSize: "13px",
-                    color: isSelected ? "var(--accent-text)" : "var(--text-primary)",
-                  }}
-                >
+              <div className="overview-card-header">
+                <span className="overview-card-title">
                   {stat.topic}
                 </span>
-                <span style={{ fontSize: "11px", fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>
+                <span className="overview-card-count">
                   {user ? `${stat.completed} / ${stat.total}` : `${stat.total} problems`}
                 </span>
               </div>
@@ -88,31 +74,19 @@ export const TopicsView: React.FC = () => {
       {/* Selected Topic Problems View */}
       {selectedTopic && (
         <div key={selectedTopic} className="topic-detail-section">
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "12px 16px",
-              backgroundColor: "var(--bg-card)",
-              borderRadius: "var(--radius-md)",
-              border: "1px solid var(--border-subtle)",
-              flexWrap: "wrap",
-              gap: 8,
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <Tags size={16} style={{ color: "var(--accent-text)" }} />
-              <h2 style={{ fontSize: "15px", fontWeight: 700, color: "var(--text-primary)" }}>
+          <div className="detail-header-card">
+            <div className="detail-header-left">
+              <Tags size={16} className="detail-header-icon" />
+              <h2 className="detail-header-title">
                 {selectedTopic}
               </h2>
-              <span style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>
+              <span className="detail-header-count">
                 ({topicProblems.length} {topicProblems.length === 1 ? "problem" : "problems"})
               </span>
             </div>
 
             {user && activeStat && (
-              <span style={{ fontSize: "12px", color: "var(--text-secondary)", fontFamily: "var(--font-mono)" }}>
+              <span className="detail-header-stats">
                 {activeStat.completed} completed • {activeStat.inProgress} in progress • {activeStat.notStarted} not started
               </span>
             )}

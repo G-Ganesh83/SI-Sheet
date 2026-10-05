@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useTracker } from "../../context/useTracker";
 import { useAuth } from "../../context/useAuth";
 import { StatusBadge } from "../common/StatusBadge";
@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 export const DashboardView: React.FC = () => {
+  const [openStatusProblemId, setOpenStatusProblemId] = useState<string | null>(null);
   const { user, profile, signInWithGoogle, showAuthPrompt } = useAuth();
   const {
     totalProblems,
@@ -290,10 +291,11 @@ export const DashboardView: React.FC = () => {
             <div className="compact-list">
               {continueLearningProblems.map((p) => {
                 const progress = getProgress(p.id);
+                const isDropdownOpen = openStatusProblemId === p.id;
                 return (
                   <div
                     key={p.id}
-                    className="compact-item"
+                    className={`compact-item ${isDropdownOpen ? "dropdown-open" : ""}`}
                     onClick={() => setSelectedProblemId(p.id)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
@@ -307,11 +309,17 @@ export const DashboardView: React.FC = () => {
                   >
                     <div className="compact-item-left">
                       {user ? (
-                        <div onClick={(e) => e.stopPropagation()}>
+                        <div
+                          className="compact-status-control"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <StatusBadge
                             status={progress.status}
                             onChange={(s) => handleStatusChange(p.id, s)}
                             compact={true}
+                            onOpenChange={(isOpen) =>
+                              setOpenStatusProblemId(isOpen ? p.id : null)
+                            }
                           />
                         </div>
                       ) : (
@@ -320,20 +328,23 @@ export const DashboardView: React.FC = () => {
                       <span className="compact-item-title">{p.title}</span>
                     </div>
 
-                    <div className="compact-item-right" onClick={(e) => e.stopPropagation()}>
+                    <div className="compact-item-right">
                       <span className="compact-item-tag">{p.topics[0]}</span>
                       {user && (
-                        <RevisionCheckbox
-                          checked={progress.revision}
-                          onChange={() => handleRevisionToggle(p.id)}
-                          compact={true}
-                        />
+                        <div onClick={(e) => e.stopPropagation()} style={{ display: "inline-flex" }}>
+                          <RevisionCheckbox
+                            checked={progress.revision}
+                            onChange={() => handleRevisionToggle(p.id)}
+                            compact={true}
+                          />
+                        </div>
                       )}
                       <a
                         href={p.url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="btn-icon"
+                        onClick={(e) => e.stopPropagation()}
                         title={`Open on ${p.platform}`}
                         aria-label={`Open ${p.title} on ${p.platform}`}
                       >
@@ -379,10 +390,11 @@ export const DashboardView: React.FC = () => {
             <div className="compact-list">
               {revisionProblems.slice(0, 5).map((p) => {
                 const progress = getProgress(p.id);
+                const isDropdownOpen = openStatusProblemId === p.id;
                 return (
                   <div
                     key={p.id}
-                    className="compact-item"
+                    className={`compact-item ${isDropdownOpen ? "dropdown-open" : ""}`}
                     onClick={() => setSelectedProblemId(p.id)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
@@ -395,23 +407,30 @@ export const DashboardView: React.FC = () => {
                     title="Click to inspect problem & notes"
                   >
                     <div className="compact-item-left">
-                      <div onClick={(e) => e.stopPropagation()}>
+                      <div
+                        className="compact-status-control"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <StatusBadge
                           status={progress.status}
                           onChange={(s) => handleStatusChange(p.id, s)}
                           compact={true}
+                          onOpenChange={(isOpen) =>
+                            setOpenStatusProblemId(isOpen ? p.id : null)
+                          }
                         />
                       </div>
                       <span className="compact-item-title">{p.title}</span>
                     </div>
 
-                    <div className="compact-item-right" onClick={(e) => e.stopPropagation()}>
+                    <div className="compact-item-right">
                       <span className="compact-item-tag">{p.topics[0]}</span>
                       <a
                         href={p.url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="btn-icon"
+                        onClick={(e) => e.stopPropagation()}
                         title={`Open on ${p.platform}`}
                         aria-label={`Open ${p.title} on ${p.platform}`}
                       >

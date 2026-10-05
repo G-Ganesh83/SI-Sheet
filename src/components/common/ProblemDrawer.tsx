@@ -93,30 +93,21 @@ export const ProblemDrawer: React.FC = () => {
   return (
     <div className="drawer-overlay" onClick={() => setSelectedProblemId(null)}>
       <div className="drawer-content" onClick={(e) => e.stopPropagation()}>
+        <div className="drawer-handle" />
         <div className="drawer-header">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1, paddingRight: 8 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div className="drawer-header-content">
+            <div className="drawer-meta-row">
               <span className={`platform-badge ${getPlatformClass(problem.platform)}`}>
                 {problem.platform}
               </span>
-              <span style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>
+              <span className="drawer-problem-id">
                 ID: {problem.id}
               </span>
               {isAdmin && (
                 <button
                   type="button"
-                  className="btn-secondary"
+                  className="btn-secondary drawer-edit-btn"
                   onClick={() => setIsEditOpen(true)}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 4,
-                    height: "22px",
-                    padding: "0 6px",
-                    fontSize: "11px",
-                    borderRadius: "var(--radius-sm)",
-                    marginLeft: "auto",
-                  }}
                   title={`Edit ${problem.title}`}
                 >
                   <Pencil size={11} />
@@ -124,45 +115,38 @@ export const ProblemDrawer: React.FC = () => {
                 </button>
               )}
             </div>
-            <h2 style={{ fontSize: "17px", fontWeight: 700, color: "var(--text-primary)", lineHeight: 1.3 }}>
+            <h2 className="drawer-title">
               {problem.title}
             </h2>
           </div>
           <button
             type="button"
-            className="btn-icon"
+            className="btn-icon drawer-close-btn"
             onClick={() => setSelectedProblemId(null)}
             aria-label="Close inspector drawer"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
         <div className="drawer-body">
-          {/* Status & Quick Action row */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "12px 14px",
-              backgroundColor: "var(--bg-app)",
-              borderRadius: "var(--radius-md)",
-              border: "1px solid var(--border-subtle)",
-            }}
-          >
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              <span style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 600 }}>
-                Status
-              </span>
-              <StatusBadge status={progress.status} onChange={requireAuth((s) => updateStatus(problem.id, s))} />
+          {/* Status & Revision Row */}
+          <div className="drawer-status-card">
+            <div className="drawer-status-col">
+              <span className="drawer-status-label">Status</span>
+              <StatusBadge
+                status={progress.status}
+                onChange={requireAuth((s) => updateStatus(problem.id, s))}
+              />
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-end" }}>
-              <span style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 600 }}>
-                Revision
-              </span>
-              <RevisionCheckbox checked={progress.revision} onChange={requireAuth(() => toggleRevision(problem.id))} label="Need Revision" />
+            <div className="drawer-status-col right">
+              <span className="drawer-status-label">Revision</span>
+              <RevisionCheckbox
+                checked={progress.revision}
+                onChange={requireAuth(() => toggleRevision(problem.id))}
+                label="Need Revision"
+              />
             </div>
           </div>
 
@@ -171,20 +155,19 @@ export const ProblemDrawer: React.FC = () => {
             href={problem.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-primary"
-            style={{ width: "100%", padding: "10px 14px", textDecoration: "none" }}
+            className="btn-primary drawer-link-btn"
           >
             <span>Open Problem on {problem.platform}</span>
-            <ExternalLink size={14} />
+            <ExternalLink size={13} />
           </a>
 
           {/* Topics */}
           <div className="drawer-section">
-            <div className="drawer-label" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <div className="drawer-label">
               <Tag size={12} />
               <span>Algorithmic Topics</span>
             </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            <div className="drawer-tags-wrap">
               {problem.topics.map((t) => (
                 <button
                   key={t}
@@ -204,11 +187,11 @@ export const ProblemDrawer: React.FC = () => {
 
           {/* Lab Dates */}
           <div className="drawer-section">
-            <div className="drawer-label" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <div className="drawer-label">
               <Calendar size={12} />
               <span>Assigned Lab Sessions</span>
             </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            <div className="drawer-tags-wrap">
               {problem.labDates.map((date) => (
                 <button
                   key={date}
@@ -225,36 +208,21 @@ export const ProblemDrawer: React.FC = () => {
               ))}
             </div>
             {problem.labDates.length > 1 && (
-              <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: 2 }}>
+              <p className="drawer-subnote">
                 ℹ️ Assigned across multiple lab dates; deduplicated as one unique tracking item.
               </p>
             )}
           </div>
 
           {/* Notes Section */}
-          <div className="drawer-section" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: 4,
-              }}
-            >
-              <div className="drawer-label" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <div className="drawer-section drawer-notes-section">
+            <div className="drawer-notes-header">
+              <div className="drawer-label">
                 <FileText size={12} />
                 <span>Personal Notes</span>
               </div>
               {isSaved && (
-                <span
-                  style={{
-                    fontSize: "11px",
-                    color: "var(--status-completed)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 4,
-                  }}
-                >
+                <span className="drawer-notes-saved">
                   <Check size={12} /> Saved
                 </span>
               )}
@@ -272,13 +240,12 @@ export const ProblemDrawer: React.FC = () => {
             ) : (
               <>
                 <textarea
-                  className="notes-textarea"
-                  style={{ flex: 1, minHeight: "140px" }}
+                  className="notes-textarea drawer-textarea"
                   placeholder="Record your solution intuition, complexity (O(N) / O(1)), edge cases to remember..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                 />
-                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+                <div className="drawer-notes-footer">
                   <button type="button" className="btn-secondary" onClick={handleSaveNotes}>
                     <Check size={13} />
                     <span>Save Notes</span>

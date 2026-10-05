@@ -36,8 +36,8 @@ export const SignOutConfirmModal: React.FC<SignOutConfirmModalProps> = ({
     >
       <div className="confirm-dialog" onClick={(e) => e.stopPropagation()}>
         <div className="confirm-dialog-header">
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <LogOut size={15} style={{ color: "var(--accent-text)" }} />
+          <div className="confirm-dialog-header-left">
+            <LogOut size={15} className="confirm-dialog-icon" />
             <span id="confirm-signout-title" className="confirm-dialog-title">
               Sign out?
             </span>

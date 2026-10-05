@@ -6,13 +6,23 @@ interface StatusBadgeProps {
   status: ProblemStatus;
   onChange: (newStatus: ProblemStatus) => void;
   compact?: boolean;
+  onOpenChange?: (isOpen: boolean) => void;
 }
 
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, onChange, compact = false }) => {
+export const StatusBadge: React.FC<StatusBadgeProps> = ({
+  status,
+  onChange,
+  compact = false,
+  onOpenChange,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [openUpward, setOpenUpward] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    onOpenChange?.(isOpen);
+  }, [isOpen, onOpenChange]);
 
   // Position calculation: check if dropdown should open upward
   const updatePosition = useCallback(() => {
@@ -93,6 +103,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, onChange, comp
         display: "inline-block",
         zIndex: isOpen ? 50 : undefined,
       }}
+      onClick={(e) => e.stopPropagation()}
     >
       <button
         ref={buttonRef}
@@ -124,6 +135,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, onChange, comp
             zIndex: 60,
           }}
           onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
         >
           {(["not-started", "in-progress", "completed"] as ProblemStatus[]).map((s) => (
             <button
@@ -132,7 +144,8 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, onChange, comp
               role="option"
               aria-selected={status === s}
               className={`status-dropdown-item ${s} ${status === s ? "active" : ""}`}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 onChange(s);
                 setIsOpen(false);
                 buttonRef.current?.focus();

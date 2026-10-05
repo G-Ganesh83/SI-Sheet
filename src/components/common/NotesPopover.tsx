@@ -47,8 +47,8 @@ export const NotesModal: React.FC<NotesPopoverProps> = ({
     >
       <div className="notes-dialog" onClick={(e) => e.stopPropagation()}>
         <div className="notes-header">
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <FileText size={15} style={{ color: "var(--accent-text)" }} />
+          <div className="notes-header-left">
+            <FileText size={14} className="notes-header-icon" />
             <span id="notes-title" className="notes-title">
               Personal Notes
             </span>
@@ -64,7 +64,7 @@ export const NotesModal: React.FC<NotesPopoverProps> = ({
         </div>
 
         <div className="notes-body">
-          <div style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: 500 }}>
+          <div className="notes-problem-title">
             {problemTitle}
           </div>
           <textarea
@@ -81,7 +81,7 @@ export const NotesModal: React.FC<NotesPopoverProps> = ({
             Cancel
           </button>
           <button type="button" className="btn-primary" onClick={handleSave}>
-            <Check size={14} />
+            <Check size={13} />
             <span>Save</span>
           </button>
         </div>

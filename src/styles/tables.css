@@ -46,10 +46,11 @@
 }
 
 .problem-table td {
-  padding: 9px 14px;
+  padding: 10px 14px;
   border-bottom: 1px solid var(--border-subtle);
   vertical-align: middle;
   font-size: 13px;
+  height: 50px; /* Establish consistent comfortable baseline height; acts as min-height */
 }
 
 .problem-table tr:last-child td {
@@ -59,6 +60,7 @@
 .problem-row {
   position: relative;
   transition: background-color var(--transition-fast);
+  height: 50px;
 }
 
 .problem-row:hover {
