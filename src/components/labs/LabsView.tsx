@@ -15,7 +15,12 @@ export const LabsView: React.FC = () => {
     <div className="view-container">
       <div className="view-header">
         <div className="view-title-row">
-          <h1 className="view-title">Lab Sessions</h1>
+          <div className="view-title-group">
+            <h1 className="view-title">Lab Sessions</h1>
+            <span className="result-count-badge">
+              {labStats.length} sessions
+            </span>
+          </div>
           <button
             type="button"
             className="btn-secondary"
@@ -36,6 +41,7 @@ export const LabsView: React.FC = () => {
         {labStats.map((lab) => {
           const isSelected = lab.date === selectedDate;
           const percentage = lab.total > 0 ? Math.round((lab.completed / lab.total) * 100) : 0;
+          const isCompleted = Boolean(user && lab.total > 0 && lab.completed === lab.total);
           return (
             <div
               key={lab.date}
@@ -55,7 +61,7 @@ export const LabsView: React.FC = () => {
                 <span className="overview-card-title mono">
                   {lab.date}
                 </span>
-                <span className="overview-card-count">
+                <span className={`overview-card-count ${isCompleted ? "completed" : ""}`}>
                   {user ? `${lab.completed} / ${lab.total}` : `${lab.total} problems`}
                 </span>
               </div>
@@ -75,7 +81,7 @@ export const LabsView: React.FC = () => {
         <div key={selectedDate} className="topic-detail-section">
           <div className="detail-header-card">
             <div className="detail-header-left">
-              <Calendar size={16} className="detail-header-icon" />
+              <Calendar size={15} className="detail-header-icon" />
               <h2 className="detail-header-title mono">
                 Lab — {activeLab.date}
               </h2>
@@ -86,7 +92,11 @@ export const LabsView: React.FC = () => {
 
             {user && (
               <span className="detail-header-stats">
-                {activeLab.completed} completed • {activeLab.inProgress} in progress • {activeLab.notStarted} not started
+                <span className="stat-completed-val">{activeLab.completed} completed</span>
+                <span className="stat-sep">•</span>
+                <span>{activeLab.inProgress} in progress</span>
+                <span className="stat-sep">•</span>
+                <span>{activeLab.notStarted} not started</span>
               </span>
             )}
           </div>

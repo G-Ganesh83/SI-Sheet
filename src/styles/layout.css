@@ -159,6 +159,13 @@
   margin-bottom: 4px;
 }
 
+.view-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .view-title {
   font-size: 18px;
   font-weight: 700;

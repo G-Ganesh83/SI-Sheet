@@ -16,7 +16,12 @@ export const TopicsView: React.FC = () => {
     <div className="view-container">
       <div className="view-header">
         <div className="view-title-row">
-          <h1 className="view-title">Algorithmic Topics</h1>
+          <div className="view-title-group">
+            <h1 className="view-title">Algorithmic Topics</h1>
+            <span className="result-count-badge">
+              {topicStats.length} topics
+            </span>
+          </div>
           <button
             type="button"
             className="btn-secondary"
@@ -37,6 +42,7 @@ export const TopicsView: React.FC = () => {
         {topicStats.map((stat) => {
           const isSelected = stat.topic === selectedTopic;
           const percentage = stat.total > 0 ? Math.round((stat.completed / stat.total) * 100) : 0;
+          const isCompleted = Boolean(user && stat.total > 0 && stat.completed === stat.total);
           return (
             <div
               key={stat.topic}
@@ -56,7 +62,7 @@ export const TopicsView: React.FC = () => {
                 <span className="overview-card-title">
                   {stat.topic}
                 </span>
-                <span className="overview-card-count">
+                <span className={`overview-card-count ${isCompleted ? "completed" : ""}`}>
                   {user ? `${stat.completed} / ${stat.total}` : `${stat.total} problems`}
                 </span>
               </div>
@@ -76,7 +82,7 @@ export const TopicsView: React.FC = () => {
         <div key={selectedTopic} className="topic-detail-section">
           <div className="detail-header-card">
             <div className="detail-header-left">
-              <Tags size={16} className="detail-header-icon" />
+              <Tags size={15} className="detail-header-icon" />
               <h2 className="detail-header-title">
                 {selectedTopic}
               </h2>
@@ -87,7 +93,11 @@ export const TopicsView: React.FC = () => {
 
             {user && activeStat && (
               <span className="detail-header-stats">
-                {activeStat.completed} completed • {activeStat.inProgress} in progress • {activeStat.notStarted} not started
+                <span className="stat-completed-val">{activeStat.completed} completed</span>
+                <span className="stat-sep">•</span>
+                <span>{activeStat.inProgress} in progress</span>
+                <span className="stat-sep">•</span>
+                <span>{activeStat.notStarted} not started</span>
               </span>
             )}
           </div>
