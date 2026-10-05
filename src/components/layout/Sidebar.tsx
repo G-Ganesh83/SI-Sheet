@@ -70,14 +70,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ onRequestSignOut }) => {
     <aside className="sidebar">
       <div className="sidebar-header">
         <div className="brand">
-          <div className="brand-icon">
-            <Terminal size={14} />
+          <div className="brand-icon" aria-hidden="true">
+            <Terminal size={14} strokeWidth={2.2} />
           </div>
           <span>SI Sheet</span>
         </div>
         <button
           type="button"
-          className="btn-icon"
+          className="theme-toggle-btn"
           onClick={toggleTheme}
           title={`Switch to ${theme === "dark" ? "Light" : "Dark"} Mode`}
           aria-label="Toggle color theme"
@@ -96,7 +96,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onRequestSignOut }) => {
               className={`nav-item ${isActive ? "active" : ""}`}
               onClick={() => setActiveTab(item.id)}
             >
-              {item.icon}
+              <span className="nav-icon">{item.icon}</span>
               <span>{item.label}</span>
               {item.badge !== undefined && <span className="nav-badge">{item.badge}</span>}
             </button>
@@ -114,7 +114,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onRequestSignOut }) => {
               className={`nav-item ${activeTab === "import" ? "active" : ""}`}
               onClick={() => setActiveTab("import")}
             >
-              <Upload size={16} />
+              <span className="nav-icon"><Upload size={16} /></span>
               <span>Import</span>
             </button>
             <button
@@ -122,7 +122,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onRequestSignOut }) => {
               className={`nav-item ${activeTab === "users" ? "active" : ""}`}
               onClick={() => setActiveTab("users")}
             >
-              <Users size={16} />
+              <span className="nav-icon"><Users size={16} /></span>
               <span>Users</span>
             </button>
             <button
@@ -130,7 +130,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onRequestSignOut }) => {
               className={`nav-item ${activeTab === "footer-clicks" ? "active" : ""}`}
               onClick={() => setActiveTab("footer-clicks")}
             >
-              <MousePointerClick size={16} />
+              <span className="nav-icon"><MousePointerClick size={16} /></span>
               <span>Footer Clicks</span>
             </button>
           </div>
@@ -156,7 +156,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onRequestSignOut }) => {
           </div>
           <button
             type="button"
-            className="btn-icon sidebar-user-logout"
+            className="sidebar-user-logout"
             onClick={onRequestSignOut ?? signOut}
             title="Sign out"
             aria-label="Sign out"

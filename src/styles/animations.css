@@ -122,6 +122,16 @@
   to { transform: translateY(0); }
 }
 
+/* Metallic silver shimmer across startup wordmark */
+@keyframes silverShimmer {
+  0% {
+    background-position: 150% 0;
+  }
+  100% {
+    background-position: -50% 0;
+  }
+}
+
 /* Checkbox & Button Micro-Interactions */
 .checkbox-box {
   transition: background-color 150ms ease, border-color 150ms ease, transform 150ms cubic-bezier(0.16, 1, 0.3, 1);

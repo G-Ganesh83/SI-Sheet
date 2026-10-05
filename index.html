@@ -22,16 +22,21 @@
     <script>
       (function () {
         try {
-          var stored = localStorage.getItem("dsa-lab-tracker:v1");
-          if (stored) {
-            var parsed = JSON.parse(stored);
-            var theme = parsed && parsed.theme === "light" ? "light" : "dark";
-            document.documentElement.setAttribute("data-theme", theme);
-            if (theme === "dark") {
-              document.documentElement.classList.add("dark");
-            } else {
-              document.documentElement.classList.remove("dark");
-            }
+          var stored = localStorage.getItem("si-sheet:theme") || localStorage.getItem("dsa-lab-tracker:v1");
+          var theme = "dark";
+          if (stored === "light" || stored === "dark") {
+            theme = stored;
+          } else if (stored) {
+            try {
+              var parsed = JSON.parse(stored);
+              if (parsed && parsed.theme === "light") theme = "light";
+            } catch (e) {}
+          }
+          document.documentElement.setAttribute("data-theme", theme);
+          if (theme === "dark") {
+            document.documentElement.classList.add("dark");
+          } else {
+            document.documentElement.classList.remove("dark");
           }
         } catch (e) {}
       })();

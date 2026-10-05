@@ -1,15 +1,24 @@
 import React from "react";
 import { Terminal } from "lucide-react";
 
-export const LoadingScreen: React.FC = () => {
+interface LoadingScreenProps {
+  isExiting?: boolean;
+}
+
+export const LoadingScreen: React.FC<LoadingScreenProps> = ({ isExiting = false }) => {
   return (
-    <div className="auth-loading-container">
-      <div className="auth-loading-card">
-        <div className="auth-loading-icon">
-          <Terminal size={24} />
+    <div
+      className={`startup-screen ${isExiting ? "startup-screen--exiting" : ""}`}
+      role="status"
+      aria-live="polite"
+      id="startup-loading-screen"
+    >
+      <span className="startup-sr-only">Initializing SI Sheet...</span>
+      <div className="startup-brand" aria-hidden="true">
+        <div className="startup-brand-icon">
+          <Terminal size={22} strokeWidth={2.2} />
         </div>
-        <div className="auth-loading-spinner" />
-        <span className="auth-loading-text">Authenticating session...</span>
+        <span className="startup-wordmark">SI SHEET</span>
       </div>
     </div>
   );

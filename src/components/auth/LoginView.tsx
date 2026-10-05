@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Terminal, Shield, CheckCircle2, AlertCircle, ArrowRight } from "lucide-react";
+import { Terminal, Shield, AlertCircle } from "lucide-react";
 import { useAuth } from "../../context/useAuth";
 
 export const LoginView: React.FC = () => {
@@ -7,24 +7,23 @@ export const LoginView: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSignIn = async () => {
+    if (isSubmitting) return;
     setIsSubmitting(true);
     try {
       await signInWithGoogle();
     } finally {
-      // The browser redirects away during OAuth, but in case of instant error:
+      // Browser redirects away during OAuth, but in case of instant error:
       setIsSubmitting(false);
     }
   };
 
   return (
     <div className="auth-page">
-      <div className="auth-background-glow" />
-
       <main className="auth-card">
         {/* Header Branding */}
         <div className="auth-header">
-          <div className="auth-logo-badge">
-            <Terminal size={22} className="auth-logo-icon" />
+          <div className="auth-logo-badge" aria-hidden="true">
+            <Terminal size={20} strokeWidth={2.2} />
           </div>
           <h1 className="auth-title">SI Sheet</h1>
           <p className="auth-subtitle">
@@ -32,26 +31,15 @@ export const LoginView: React.FC = () => {
           </p>
         </div>
 
-        {/* Feature Pills */}
-        <div className="auth-features">
-          <div className="auth-feature-item">
-            <CheckCircle2 size={15} className="auth-feature-icon" />
-            <span>52 Curated Problems</span>
-          </div>
-          <div className="auth-feature-item">
-            <CheckCircle2 size={15} className="auth-feature-icon" />
-            <span>9 Lab Milestones</span>
-          </div>
-          <div className="auth-feature-item">
-            <CheckCircle2 size={15} className="auth-feature-icon" />
-            <span>Revision &amp; Topic Tracking</span>
-          </div>
-        </div>
+        {/* Short useful benefit message */}
+        <p className="auth-benefit-message">
+          Track problem status, build your revision queue, and keep notes synchronized across all your devices.
+        </p>
 
         {/* Error Alert if any */}
         {error && (
           <div className="auth-error-banner" role="alert">
-            <AlertCircle size={16} className="auth-error-icon" />
+            <AlertCircle size={15} className="auth-error-icon" />
             <span className="auth-error-message">{error}</span>
             <button
               type="button"
@@ -64,7 +52,7 @@ export const LoginView: React.FC = () => {
           </div>
         )}
 
-        {/* Sign In Action */}
+        {/* Sign In Action Area */}
         <div className="auth-action-area">
           <button
             type="button"
@@ -72,15 +60,16 @@ export const LoginView: React.FC = () => {
             onClick={handleSignIn}
             disabled={isSubmitting}
             id="google-signin-button"
+            aria-busy={isSubmitting}
           >
             {isSubmitting ? (
-              <span className="auth-btn-spinner" />
+              <span className="auth-btn-spinner" aria-hidden="true" />
             ) : (
               <svg
                 className="google-svg-icon"
                 viewBox="0 0 24 24"
-                width="18"
-                height="18"
+                width="16"
+                height="16"
                 xmlns="http://www.w3.org/2000/svg"
                 aria-hidden="true"
               >
@@ -102,15 +91,18 @@ export const LoginView: React.FC = () => {
                 />
               </svg>
             )}
-            <span>{isSubmitting ? "Connecting..." : "Sign in with Google"}</span>
-            {!isSubmitting && <ArrowRight size={15} className="auth-btn-arrow" />}
+            <span>{isSubmitting ? "Connecting…" : "Continue with Google"}</span>
           </button>
+
+          <p className="auth-supporting-text">
+            Sync progress, notes, and revision state across devices.
+          </p>
         </div>
 
         {/* Security / Info Footer */}
         <div className="auth-footer">
-          <Shield size={12} className="auth-shield-icon" />
-          <span>Secured with Supabase Authentication &amp; Row Level Security</span>
+          <Shield size={12} className="auth-shield-icon" aria-hidden="true" />
+          <span>Secured with Supabase Authentication</span>
         </div>
       </main>
     </div>

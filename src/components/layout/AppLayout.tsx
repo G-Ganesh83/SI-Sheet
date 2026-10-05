@@ -74,25 +74,25 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
         {/* Mobile Top Header */}
         <header className="mobile-header">
           <div className="brand">
-            <div className="brand-icon">
-              <Terminal size={14} />
+            <div className="brand-icon" aria-hidden="true">
+              <Terminal size={14} strokeWidth={2.2} />
             </div>
             <span>SI Sheet</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <div className="mobile-header-actions">
             <button
               type="button"
-              className="btn-icon"
+              className="theme-toggle-btn"
               onClick={toggleTheme}
+              title={`Switch to ${theme === "dark" ? "Light" : "Dark"} Mode`}
               aria-label="Toggle color theme"
             >
-              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+              {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
             </button>
             {user ? (
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div className="mobile-user-area">
                 <div
-                  className="sidebar-user-avatar"
-                  style={{ width: 22, height: 22, fontSize: 10 }}
+                  className="sidebar-user-avatar mobile-avatar"
                   title={user.email || profile?.display_name || "Signed in"}
                   aria-label={user.email || profile?.display_name || "Signed in"}
                 >
@@ -104,23 +104,23 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                 </div>
                 <button
                   type="button"
-                  className="btn-icon"
+                  className="btn-icon mobile-logout-btn"
                   onClick={() => setShowSignOutConfirm(true)}
                   title="Sign out"
                   aria-label="Sign out"
                 >
-                  <LogOut size={16} />
+                  <LogOut size={15} />
                 </button>
               </div>
             ) : (
               <button
                 type="button"
-                className="btn-icon"
+                className="btn-icon mobile-signin-btn"
                 onClick={showAuthPrompt}
                 title="Sign in"
                 aria-label="Sign in"
               >
-                <LogIn size={16} />
+                <LogIn size={15} />
               </button>
             )}
           </div>
@@ -139,23 +139,13 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
               className={`mobile-nav-item ${activeTab === item.id ? "active" : ""}`}
               onClick={() => setActiveTab(item.id)}
             >
-              <div style={{ position: "relative" }}>
+              <div className="mobile-nav-icon-wrapper">
                 {item.icon}
                 {item.id === "revision" && revisionCount > 0 && (
-                  <span
-                    style={{
-                      position: "absolute",
-                      top: -3,
-                      right: -6,
-                      width: 7,
-                      height: 7,
-                      borderRadius: "50%",
-                      backgroundColor: "var(--revision-color)",
-                    }}
-                  />
+                  <span className="mobile-nav-badge-dot" />
                 )}
               </div>
-              <span>{item.label}</span>
+              <span className="mobile-nav-label">{item.label}</span>
             </button>
           ))}
         </nav>

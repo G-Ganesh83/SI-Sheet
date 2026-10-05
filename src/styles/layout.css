@@ -26,7 +26,8 @@
 }
 
 .sidebar-header {
-  padding: 14px 16px;
+  height: 48px;
+  padding: 0 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -36,17 +37,19 @@
 .brand {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  font-size: 12px;
-  letter-spacing: 0.04em;
+  gap: 9px;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-primary);
+  line-height: 1;
 }
 
 .brand-icon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -54,6 +57,33 @@
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
   color: var(--accent);
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+
+.theme-toggle-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.theme-toggle-btn:hover {
+  background-color: var(--bg-card);
+  border-color: var(--border-subtle);
+  color: var(--text-primary);
+}
+
+.theme-toggle-btn:focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: 1px;
 }
 
 .sidebar-signin-wrapper {
@@ -61,7 +91,7 @@
 }
 
 .sidebar-footer {
-  padding: 11px 12px 13px;
+  padding: 10px 12px 12px;
   border-top: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
@@ -86,15 +116,15 @@
 }
 
 .creator-link {
-  color: var(--accent);
+  color: var(--text-secondary);
   text-decoration: none;
   font-weight: 500;
-  transition: opacity var(--transition-fast), text-decoration-color var(--transition-fast);
+  transition: color var(--transition-fast), text-decoration-color var(--transition-fast);
 }
 
 .creator-link:hover {
+  color: var(--text-primary);
   text-decoration: underline;
-  opacity: 0.85;
 }
 
 .main-content {
