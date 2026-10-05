@@ -123,33 +123,13 @@ export const DashboardView: React.FC = () => {
 
       {/* Anonymous Catalog Overview & Sign-In Callout */}
       {!user && (
-        <div className="stats-banner" style={{ borderLeft: "3px solid var(--accent)" }}>
+        <div className="stats-banner banner-callout">
           <div className="stats-row">
             <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                <span
-                  style={{
-                    fontSize: "11px",
-                    fontWeight: 600,
-                    letterSpacing: "0.05em",
-                    color: "var(--text-muted)",
-                    fontFamily: "var(--font-mono)",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  DSA CATALOG
-                </span>
+              <div className="stats-tag-row" style={{ marginBottom: 4 }}>
+                <span className="stats-section-label">DSA CATALOG</span>
                 <span style={{ color: "var(--border-strong)" }}>•</span>
-                <span
-                  style={{
-                    fontSize: "12px",
-                    fontFamily: "var(--font-mono)",
-                    fontWeight: 600,
-                    color: "var(--text-primary)",
-                  }}
-                >
-                  {totalProblems} PROBLEMS
-                </span>
+                <span className="stats-count-label">{totalProblems} PROBLEMS</span>
               </div>
               <p style={{ fontSize: "12px", color: "var(--text-secondary)", margin: 0 }}>
                 Sign in with Google to track your solved problems, save personal notes, and build your revision queue.
@@ -185,7 +165,7 @@ export const DashboardView: React.FC = () => {
 
       {/* New User Encouraging Welcome State */}
       {user && isNewUser && (
-        <div className="stats-banner" style={{ borderLeft: "3px solid var(--accent)" }}>
+        <div className="stats-banner banner-callout">
           <div className="stats-row">
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
@@ -230,30 +210,10 @@ export const DashboardView: React.FC = () => {
       {user && (
         <div className="stats-banner">
           <div className="stats-row">
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span
-                style={{
-                  fontSize: "11px",
-                  fontWeight: 600,
-                  letterSpacing: "0.05em",
-                  color: "var(--text-muted)",
-                  fontFamily: "var(--font-mono)",
-                  textTransform: "uppercase",
-                }}
-              >
-                SI SHEET
-              </span>
+            <div className="stats-tag-row">
+              <span className="stats-section-label">SI SHEET</span>
               <span style={{ color: "var(--border-strong)" }}>•</span>
-              <span
-                style={{
-                  fontSize: "12px",
-                  fontFamily: "var(--font-mono)",
-                  fontWeight: 600,
-                  color: "var(--text-primary)",
-                }}
-              >
-                {totalProblems} PROBLEMS
-              </span>
+              <span className="stats-count-label">{totalProblems} PROBLEMS</span>
             </div>
 
             <div className="stats-meta">
@@ -284,37 +244,26 @@ export const DashboardView: React.FC = () => {
           </div>
 
           {/* Dynamic Progress Bar */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ flex: 1 }}>
-              <div className="progress-track">
-                <div
-                  className="progress-fill completed"
-                  style={{
-                    width: `${totalProblems > 0 ? (completedCount / totalProblems) * 100 : 0}%`,
-                  }}
-                  title={`Completed: ${completionPercentage}%`}
-                />
-                <div
-                  className="progress-fill in-progress"
-                  style={{
-                    width: `${totalProblems > 0 ? (inProgressCount / totalProblems) * 100 : 0}%`,
-                  }}
-                  title={`In Progress: ${
-                    totalProblems > 0 ? Math.round((inProgressCount / totalProblems) * 100) : 0
-                  }%`}
-                />
-              </div>
+          <div className="progress-track-wrapper">
+            <div className="progress-track">
+              <div
+                className="progress-fill completed"
+                style={{
+                  width: `${totalProblems > 0 ? (completedCount / totalProblems) * 100 : 0}%`,
+                }}
+                title={`Completed: ${completionPercentage}%`}
+              />
+              <div
+                className="progress-fill in-progress"
+                style={{
+                  width: `${totalProblems > 0 ? (inProgressCount / totalProblems) * 100 : 0}%`,
+                }}
+                title={`In Progress: ${
+                  totalProblems > 0 ? Math.round((inProgressCount / totalProblems) * 100) : 0
+                }%`}
+              />
             </div>
-            <span
-              style={{
-                fontSize: "11.5px",
-                fontFamily: "var(--font-mono)",
-                fontWeight: 600,
-                color: "var(--text-primary)",
-                minWidth: "36px",
-                textAlign: "right",
-              }}
-            >
+            <span className="progress-percentage">
               {completionPercentage}%
             </span>
           </div>
@@ -331,13 +280,7 @@ export const DashboardView: React.FC = () => {
               <span>{user && !isNewUser ? "Continue Learning" : "Suggested to Start"}</span>
             </h2>
             {continueLearningProblems.length > 0 && user && (
-              <span
-                style={{
-                  fontSize: "10.5px",
-                  color: "var(--text-muted)",
-                  fontFamily: "var(--font-mono)",
-                }}
-              >
+              <span className="section-count-badge">
                 {continueLearningProblems.length} Active
               </span>
             )}
@@ -352,6 +295,14 @@ export const DashboardView: React.FC = () => {
                     key={p.id}
                     className="compact-item"
                     onClick={() => setSelectedProblemId(p.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelectedProblemId(p.id);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
                     title="Click to view details & notes"
                   >
                     <div className="compact-item-left">
@@ -394,11 +345,11 @@ export const DashboardView: React.FC = () => {
               })}
             </div>
           ) : (
-            <div className="empty-state" style={{ padding: "20px 10px" }}>
-              <span className="empty-state-title" style={{ fontSize: "12.5px" }}>
+            <div className="empty-state">
+              <span className="empty-state-title">
                 No active problems
               </span>
-              <p className="empty-state-desc" style={{ fontSize: "11.5px" }}>
+              <p className="empty-state-desc">
                 Mark any problem as <strong>In Progress</strong> to track your focus here.
               </p>
             </div>
@@ -433,6 +384,14 @@ export const DashboardView: React.FC = () => {
                     key={p.id}
                     className="compact-item"
                     onClick={() => setSelectedProblemId(p.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelectedProblemId(p.id);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
                     title="Click to inspect problem & notes"
                   >
                     <div className="compact-item-left">
@@ -464,11 +423,11 @@ export const DashboardView: React.FC = () => {
               })}
             </div>
           ) : (
-            <div className="empty-state" style={{ padding: "20px 10px" }}>
-              <span className="empty-state-title" style={{ fontSize: "12.5px" }}>
+            <div className="empty-state">
+              <span className="empty-state-title">
                 {user ? "You're clear — no problems marked for revision." : "No revision queue yet"}
               </span>
-              <p className="empty-state-desc" style={{ fontSize: "11.5px" }}>
+              <p className="empty-state-desc">
                 {user
                   ? "Check Need Revision on tricky problems to revisit them later."
                   : "Sign in with Google to bookmark challenging problems for your interview drill list."}
@@ -478,7 +437,7 @@ export const DashboardView: React.FC = () => {
         </section>
 
         {/* Topic Progress */}
-        <section className="dashboard-section" style={{ gridColumn: "1 / -1" }}>
+        <section className="dashboard-section dashboard-section-wide">
           <div className="section-title-row">
             <h2 className="section-title">
               <Tags size={13} style={{ color: "var(--text-secondary)" }} />
@@ -494,25 +453,22 @@ export const DashboardView: React.FC = () => {
             </button>
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-              gap: 8,
-            }}
-          >
+          <div className="topic-progress-grid">
             {topicStats.slice(0, 8).map((t) => {
               const pct = t.total > 0 ? Math.round((t.completed / t.total) * 100) : 0;
               return (
                 <div
                   key={t.topic}
                   className="topic-progress-item"
-                  style={{
-                    backgroundColor: "var(--bg-app)",
-                    border: "1px solid var(--border-subtle)",
-                    padding: "8px 10px",
-                  }}
                   onClick={() => selectTopicFilter(t.topic)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      selectTopicFilter(t.topic);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
                   title={`Filter problems by ${t.topic}`}
                 >
                   <div className="topic-progress-header">

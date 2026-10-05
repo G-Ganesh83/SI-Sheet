@@ -9,11 +9,16 @@
   background-color: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: 12px 16px;
+  padding: 14px 16px;
   margin-bottom: 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  transition: border-color var(--transition-fast);
+}
+
+.stats-banner.banner-callout {
+  border-left: 3px solid var(--accent);
 }
 
 .stats-row {
@@ -22,6 +27,28 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+.stats-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stats-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+
+.stats-count-label {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .stats-meta {
@@ -51,6 +78,7 @@
   height: 6px;
   border-radius: 50%;
   display: inline-block;
+  flex-shrink: 0;
 }
 
 .stat-dot.not-started { background-color: var(--status-not-started); }
@@ -58,11 +86,18 @@
 .stat-dot.completed { background-color: var(--status-completed); }
 .stat-dot.revision { background-color: var(--revision-color); }
 
+.progress-track-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .progress-track {
+  flex: 1;
   width: 100%;
-  height: 4px;
+  height: 5px;
   background-color: var(--bg-subtle);
-  border-radius: 2px;
+  border-radius: 3px;
   overflow: hidden;
   display: flex;
 }
@@ -78,6 +113,15 @@
 
 .progress-fill.in-progress {
   background-color: var(--status-in-progress);
+}
+
+.progress-percentage {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 36px;
+  text-align: right;
 }
 
 /* ==========================================================================
@@ -96,7 +140,11 @@
   padding: 14px 16px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+}
+
+.dashboard-section-wide {
+  grid-column: 1 / -1;
 }
 
 .section-title-row {
@@ -118,32 +166,50 @@
   gap: 6px;
 }
 
+.section-count-badge {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+
 .section-action {
   font-size: 12px;
+  font-weight: 500;
   color: var(--accent-text);
   cursor: pointer;
   background: none;
   border: none;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
+  padding: 2px 4px;
+  border-radius: var(--radius-xs);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
 }
 
 .section-action:hover {
-  text-decoration: underline;
+  color: var(--accent);
+  text-decoration: none;
+  background-color: var(--accent-subtle);
+}
+
+.section-action:focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: 1px;
 }
 
 .compact-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .compact-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 7px 9px;
+  padding: 8px 10px;
   background-color: var(--bg-app);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
@@ -156,11 +222,17 @@
   background-color: var(--bg-card-hover);
 }
 
+.compact-item:focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: 1px;
+}
+
 .compact-item-left {
   display: flex;
   align-items: center;
   gap: 8px;
   overflow: hidden;
+  min-width: 0;
 }
 
 .compact-item-title {
@@ -170,12 +242,18 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.35;
 }
 
 .compact-item-tag {
   font-size: 11px;
   color: var(--text-muted);
   font-family: var(--font-mono);
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  padding: 1px 6px;
+  border-radius: var(--radius-xs);
+  white-space: nowrap;
 }
 
 .compact-item-right {
@@ -183,6 +261,7 @@
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
+  margin-left: 8px;
 }
 
 /* Minimalist Status Badge */
@@ -565,25 +644,39 @@
 }
 
 .btn-secondary:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--border-strong);
   outline-offset: 2px;
 }
 
 /* ==========================================================================
    TOPICS & LABS COMPACT LIST
    ========================================================================== */
+.topic-progress-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+}
+
 .topic-progress-item {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 6px 8px;
+  gap: 5px;
+  padding: 8px 12px;
   cursor: pointer;
   border-radius: var(--radius-sm);
-  transition: background-color var(--transition-fast);
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-subtle);
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
 
 .topic-progress-item:hover {
+  border-color: var(--border-default);
   background-color: var(--bg-card-hover);
+}
+
+.topic-progress-item:focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: 1px;
 }
 
 .topic-progress-header {
@@ -594,14 +687,16 @@
 }
 
 .topic-progress-name {
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-primary);
+  font-size: 12px;
 }
 
 .topic-progress-count {
   font-family: var(--font-mono);
   color: var(--text-muted);
   font-size: 11px;
+  font-weight: 500;
 }
 
 .mini-bar {
@@ -609,6 +704,7 @@
   background-color: var(--bg-subtle);
   border-radius: 2px;
   overflow: hidden;
+  margin-top: 2px;
 }
 
 .mini-bar-fill {
@@ -621,7 +717,7 @@
    EMPTY STATE
    ========================================================================== */
 .empty-state {
-  padding: 40px 20px;
+  padding: 24px 16px;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -636,7 +732,7 @@
 }
 
 .empty-state-title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-secondary);
 }
@@ -645,4 +741,5 @@
   font-size: 12px;
   color: var(--text-muted);
   max-width: 320px;
+  line-height: 1.4;
 }

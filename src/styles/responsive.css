@@ -197,3 +197,10 @@
     border-top-right-radius: var(--radius-md);
   }
 }
+
+@media (max-width: 480px) {
+  .topic-progress-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
