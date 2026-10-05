@@ -1,0 +1,129 @@
+/* ==========================================================================
+   THEME TRANSITIONS, ANIMATIONS & MICRO-INTERACTIONS
+   ========================================================================== */
+
+/* ==========================================================================
+   GLOBAL THEME TRANSITION
+   Applied via .is-theme-transitioning class on <html> during toggle.
+   This creates a smooth cross-fade when switching dark ↔ light mode.
+   ========================================================================== */
+.is-theme-transitioning,
+.is-theme-transitioning *,
+.is-theme-transitioning *::before,
+.is-theme-transitioning *::after {
+  transition:
+    background-color var(--transition-theme),
+    border-color var(--transition-theme),
+    color var(--transition-theme) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   SMOOTH TRANSITIONS & ANIMATIONS
+   ========================================================================== */
+
+/* Page / View Entrance */
+.view-animated-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  animation: viewEnter 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Detail sub-section entrance — does NOT clip overflow so tables scroll */
+.topic-detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: viewEnter 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes viewEnter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Status Dropdown Menu */
+.dropdown-menu-animated {
+  animation: dropdownEnter 160ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: top left;
+}
+
+@keyframes dropdownEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Modal and Drawer Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+/* Checkbox & Button Micro-Interactions */
+.checkbox-box {
+  transition: background-color 150ms ease, border-color 150ms ease, transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.revision-toggle:hover .checkbox-box {
+  border-color: var(--accent);
+  transform: scale(1.06);
+}
+
+.revision-toggle:active .checkbox-box {
+  transform: scale(0.94);
+}
+
+/* Nav Item hover feedback */
+.nav-item {
+  transition: background-color 150ms ease, color 150ms ease, transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-item:active {
+  transform: scale(0.98);
+}
+
+.btn-primary:active, .btn-secondary:active, .btn-icon:active {
+  transform: scale(0.97);
+}

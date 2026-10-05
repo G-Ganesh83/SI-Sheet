@@ -1,0 +1,155 @@
+/* ==========================================================================
+   SI SHEET — DESIGN TOKENS & THEME VARIABLES
+   Aesthetic: Linear / Raycast / Vercel developer tool interface.
+   Coherent neutral palette, signature red accent, crisp typography, no noise.
+   ========================================================================== */
+
+:root {
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Typography Scale */
+  --text-2xs: 10px;
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 13px;
+  --text-md: 14px;
+  --text-lg: 16px;
+  --text-xl: 18px;
+  --text-2xl: 20px;
+
+  /* Spacing Rhythm */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Controlled Developer Radii */
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-full: 9999px;
+
+  /* Polished Dark Mode (Linear / Raycast deep neutral slate) */
+  --bg-app: #090a0d;
+  --bg-sidebar: #060709;
+  --bg-card: #101115;
+  --bg-card-hover: #15171d;
+  --bg-elevated: #181a21;
+  --bg-subtle: #13141a;
+  --bg-input: #0c0d10;
+
+  --border-subtle: #1c1e26;
+  --border-default: #262935;
+  --border-strong: #383d4e;
+
+  --text-primary: #f4f4f6;
+  --text-secondary: #9da3af;
+  --text-muted: #6b7280;
+  --text-faint: #4b5262;
+
+  /* Signature Red Accent (Dark Mode: calibrated crimson rose) */
+  --accent: #e11d48;
+  --accent-hover: #be123c;
+  --accent-subtle: rgba(225, 29, 72, 0.12);
+  --accent-text: #fb7185;
+  --accent-border: rgba(225, 29, 72, 0.28);
+  --accent-primary: var(--accent);
+  --accent-primary-bg: var(--accent-subtle);
+  --accent-gradient-from: #e11d48;
+  --accent-gradient-to: #be123c;
+
+  /* Functional Status Colors — strictly restrained */
+  --status-not-started: #f43f5e;
+  --status-not-started-bg: rgba(244, 63, 94, 0.08);
+  --status-not-started-border: rgba(244, 63, 94, 0.22);
+
+  --status-in-progress: #f59e0b;
+  --status-in-progress-bg: rgba(245, 158, 11, 0.08);
+  --status-in-progress-border: rgba(245, 158, 11, 0.22);
+
+  --status-completed: #10b981;
+  --status-completed-bg: rgba(16, 185, 129, 0.08);
+  --status-completed-border: rgba(16, 185, 129, 0.22);
+
+  --revision-color: #a855f7;
+  --revision-bg: rgba(168, 85, 247, 0.08);
+  --revision-border: rgba(168, 85, 247, 0.22);
+
+  /* Unified Neutral Platform Badges (No rainbow colors) */
+  --platform-text: #9da3af;
+  --platform-bg: #14151b;
+  --platform-border: #22242e;
+
+  /* Restrained Shadows & Elevation */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 28px -4px rgba(0, 0, 0, 0.5);
+
+  /* Interaction Motion */
+  --transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 180ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-theme: 180ms ease;
+}
+
+[data-theme="light"] {
+  /* Clean white / very soft neutral backgrounds */
+  --bg-app: #fcfcfd;
+  --bg-sidebar: #f4f4f6;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8f8fa;
+  --bg-elevated: #ffffff;
+  --bg-subtle: #f0f1f4;
+  --bg-input: #ffffff;
+
+  /* Subtle borders */
+  --border-subtle: #eaebee;
+  --border-default: #d6d8df;
+  --border-strong: #a6abb8;
+
+  /* Near-black primary text & restrained gray secondary text */
+  --text-primary: #0f1115;
+  --text-secondary: #4b5262;
+  --text-muted: #6b7280;
+  --text-faint: #9ca3af;
+
+  /* Signature Red Accent (Light Mode) */
+  --accent: #e11d48;
+  --accent-hover: #be123c;
+  --accent-subtle: rgba(225, 29, 72, 0.08);
+  --accent-text: #be123c;
+  --accent-border: rgba(225, 29, 72, 0.24);
+  --accent-primary: var(--accent);
+  --accent-primary-bg: var(--accent-subtle);
+  --accent-gradient-from: #e11d48;
+  --accent-gradient-to: #be123c;
+
+  --status-not-started: #e11d48;
+  --status-not-started-bg: rgba(225, 29, 72, 0.06);
+  --status-not-started-border: rgba(225, 29, 72, 0.18);
+
+  --status-in-progress: #d97706;
+  --status-in-progress-bg: rgba(217, 119, 6, 0.06);
+  --status-in-progress-border: rgba(217, 119, 6, 0.18);
+
+  --status-completed: #059669;
+  --status-completed-bg: rgba(5, 150, 105, 0.06);
+  --status-completed-border: rgba(5, 150, 105, 0.18);
+
+  --revision-color: #7e22ce;
+  --revision-bg: rgba(126, 34, 206, 0.06);
+  --revision-border: rgba(126, 34, 206, 0.18);
+
+  --platform-text: #4b5262;
+  --platform-bg: #f4f4f7;
+  --platform-border: #e3e4ea;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 3px 8px -1px rgba(0, 0, 0, 0.05), 0 1px 3px 0 rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 10px 24px -4px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+}

@@ -1,0 +1,123 @@
+/* ==========================================================================
+   NAVIGATION — SIDEBAR NAV & MOBILE BARS
+   ========================================================================== */
+
+.sidebar-nav {
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+  border: 1px solid transparent;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+}
+
+.nav-item:hover {
+  background-color: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+.nav-item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.nav-item.active {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-subtle);
+  font-weight: 600;
+}
+
+.nav-badge {
+  margin-left: auto;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  padding: 0 5px;
+  border-radius: 4px;
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+}
+
+.nav-item.active .nav-badge {
+  color: var(--text-secondary);
+  border-color: var(--border-default);
+}
+
+.sidebar-admin-section {
+  margin-top: 4px;
+}
+
+.sidebar-section-divider {
+  height: 1px;
+  background-color: var(--border-subtle);
+  margin: 8px 6px;
+}
+
+.sidebar-section-header {
+  padding: 4px 10px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+}
+
+/* Mobile top header & bottom nav */
+.mobile-header {
+  display: none;
+  height: 48px;
+  padding: 0 14px;
+  background-color: var(--bg-sidebar);
+  border-bottom: 1px solid var(--border-subtle);
+  align-items: center;
+  justify-content: space-between;
+  z-index: 30;
+}
+
+.mobile-bottom-nav {
+  display: none;
+  height: 52px;
+  background-color: var(--bg-sidebar);
+  border-top: 1px solid var(--border-subtle);
+  align-items: center;
+  justify-content: space-around;
+  z-index: 30;
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.mobile-nav-item.active {
+  color: var(--accent);
+}

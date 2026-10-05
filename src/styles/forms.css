@@ -1,0 +1,372 @@
+/* ==========================================================================
+   FORM CONTROLS, SEARCH, FILTER BAR & IMPORT WORKFLOW
+   ========================================================================== */
+
+/* ==========================================================================
+   PROBLEM LIST / TABLE UI
+   ========================================================================== */
+.table-filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.search-and-quick {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.search-input-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.search-icon {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  height: 32px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0 10px 0 32px;
+  font-size: 13px;
+  color: var(--text-primary);
+  text-overflow: ellipsis;
+  transition: border-color var(--transition-fast);
+}
+
+.search-input:focus {
+  border-color: var(--border-strong);
+  background-color: var(--bg-input);
+  outline: none;
+}
+
+.search-input:focus-visible {
+  border-color: var(--border-strong);
+  outline: 2px solid var(--border-strong);
+  outline-offset: 1px;
+}
+
+.search-shortcut {
+  position: absolute;
+  right: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-faint);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  padding: 1px 5px;
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.filters-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-select {
+  height: 30px;
+  max-width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0 24px 0 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast), background-color var(--transition-fast);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  outline: none;
+}
+
+.filter-select:hover {
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+
+.filter-select:focus {
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+  background-color: var(--bg-card-hover);
+  outline: none;
+}
+
+.filter-select:focus-visible {
+  border-color: var(--border-strong);
+  outline: 2px solid var(--border-strong);
+  outline-offset: 1px;
+}
+
+.filter-clear-btn {
+  height: 30px;
+  background: none;
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 0 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.filter-clear-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+.filter-active {
+  border-color: var(--border-strong) !important;
+  color: var(--text-primary) !important;
+  background-color: var(--bg-elevated) !important;
+  font-weight: 500;
+}
+
+.filter-active:hover {
+  border-color: var(--text-secondary) !important;
+}
+
+.filter-active:focus-visible {
+  border-color: var(--border-strong) !important;
+  outline: 2px solid var(--border-strong) !important;
+  outline-offset: 1px;
+}
+
+/* ==========================================================================
+   IMPORT WORKFLOW
+   ========================================================================== */
+.import-panel {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.import-tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  width: fit-content;
+}
+
+.import-tab {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.import-tab.active {
+  background-color: var(--bg-card-hover);
+  border-color: var(--border-subtle);
+  color: var(--text-primary);
+}
+
+.import-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  align-items: end;
+}
+
+.import-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.import-field > span {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.import-field-wide {
+  grid-column: span 2;
+}
+
+.import-input,
+.import-textarea {
+  width: 100%;
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.import-input {
+  height: 32px;
+  padding: 0 9px;
+  font-size: 13px;
+}
+
+.import-textarea {
+  min-height: 76px;
+  resize: vertical;
+  padding: 8px 9px;
+  font-size: 13px;
+}
+
+.import-input:focus,
+.import-textarea:focus {
+  border-color: var(--accent);
+  background-color: var(--bg-input);
+}
+
+.import-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.import-alert,
+.import-success {
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 12px;
+  border: 1px solid var(--border-subtle);
+}
+
+.import-alert {
+  color: var(--status-in-progress);
+  background-color: var(--status-in-progress-bg);
+  border-color: var(--status-in-progress-border);
+}
+
+.import-success {
+  color: var(--status-completed);
+  background-color: var(--status-completed-bg);
+  border-color: var(--status-completed-border);
+}
+
+.import-preview-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.import-preview-row {
+  display: grid;
+  grid-template-columns: minmax(86px, 0.45fr) repeat(4, minmax(120px, 1fr));
+  gap: 10px;
+  padding: 12px;
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.import-preview-row .import-field-wide {
+  grid-column: span 2;
+}
+
+.import-row-meta {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+
+.import-action-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  padding: 2px 6px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.import-action-pill.new,
+.import-action-pill.add-lab-date {
+  color: var(--status-completed);
+  background: var(--status-completed-bg);
+  border-color: var(--status-completed-border);
+}
+
+.import-action-pill.already-exists {
+  color: var(--text-muted);
+}
+
+.import-action-pill.possible-duplicate {
+  color: var(--status-in-progress);
+  background: var(--status-in-progress-bg);
+  border-color: var(--status-in-progress-border);
+}
+
+.import-action-pill.invalid {
+  color: var(--status-not-started);
+  background: var(--status-not-started-bg);
+  border-color: var(--status-not-started-border);
+}
+
+.import-messages {
+  grid-column: 1 / -1;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.import-confirm-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 12px;
+}
+
+.import-existing-search {
+  max-width: 420px;
+  width: 100%;
+}
+
+button:disabled,
+input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

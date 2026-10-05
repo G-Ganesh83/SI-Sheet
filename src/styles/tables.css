@@ -1,0 +1,78 @@
+/* ==========================================================================
+   DATA TABLES — PROBLEM LIST TABLE VIEW
+   ========================================================================== */
+
+/* Problem Table */
+.problem-table-container {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.problem-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.problem-table th {
+  background-color: var(--bg-sidebar);
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-subtle);
+  user-select: none;
+}
+
+.problem-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+  font-size: 13px;
+}
+
+.problem-table tr:last-child td {
+  border-bottom: none;
+}
+
+.problem-row {
+  transition: background-color var(--transition-fast);
+}
+
+.problem-row:hover {
+  background-color: var(--bg-card-hover);
+}
+
+.problem-title-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.problem-title-link {
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 13px;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  line-height: 1.35;
+  transition: color var(--transition-fast);
+}
+
+.problem-title-link:hover {
+  color: var(--accent-text) !important;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
