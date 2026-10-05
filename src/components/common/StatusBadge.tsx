@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from "react";
 import type { ProblemStatus } from "../../types/tracker";
 import { ChevronDown, CheckCircle2, Clock, Circle } from "lucide-react";
 
@@ -10,8 +10,29 @@ interface StatusBadgeProps {
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, onChange, compact = false }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpward, setOpenUpward] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
+  // Position calculation: check if dropdown should open upward
+  const updatePosition = useCallback(() => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const dropdownEstimatedHeight = 140;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      // If space below is less than dropdown height and there is more space above
+      const shouldOpenUp = spaceBelow < dropdownEstimatedHeight && rect.top > spaceBelow;
+      setOpenUpward(shouldOpenUp);
+    }
+  }, []);
+
+  useLayoutEffect(() => {
+    if (isOpen) {
+      updatePosition();
+    }
+  }, [isOpen, updatePosition]);
+
+  // Click outside listener
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -24,6 +45,19 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, onChange, comp
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
+  }, [isOpen]);
+
+  // Keyboard navigation & accessibility
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsOpen(false);
+        buttonRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen]);
 
   const getStatusLabel = (s: ProblemStatus) => {
@@ -51,8 +85,17 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, onChange, comp
   };
 
   return (
-    <div ref={containerRef} style={{ position: "relative", display: "inline-block" }}>
+    <div
+      ref={containerRef}
+      className={`status-badge-container ${isOpen ? "dropdown-open" : ""}`}
+      style={{
+        position: "relative",
+        display: "inline-block",
+        zIndex: isOpen ? 50 : undefined,
+      }}
+    >
       <button
+        ref={buttonRef}
         type="button"
         className={`status-badge ${status}`}
         onClick={(e) => {
@@ -70,21 +113,15 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, onChange, comp
 
       {isOpen && (
         <div
-          className="dropdown-menu-animated"
+          role="listbox"
+          aria-label="Select problem status"
+          className={`dropdown-menu-animated status-dropdown-menu ${openUpward ? "upward" : ""}`}
           style={{
             position: "absolute",
-            top: "calc(100% + 4px)",
+            top: openUpward ? "auto" : "calc(100% + 4px)",
+            bottom: openUpward ? "calc(100% + 4px)" : "auto",
             left: 0,
-            zIndex: 40,
-            backgroundColor: "var(--bg-elevated)",
-            border: "1px solid var(--border-default)",
-            borderRadius: "var(--radius-md)",
-            boxShadow: "var(--shadow-md)",
-            padding: "4px",
-            minWidth: "140px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "2px",
+            zIndex: 60,
           }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -92,18 +129,13 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, onChange, comp
             <button
               key={s}
               type="button"
-              className={`status-badge ${s}`}
-              style={{
-                width: "100%",
-                justifyContent: "flex-start",
-                padding: "6px 8px",
-                border: "none",
-                borderRadius: "var(--radius-sm)",
-                backgroundColor: status === s ? undefined : "transparent",
-              }}
+              role="option"
+              aria-selected={status === s}
+              className={`status-dropdown-item ${s} ${status === s ? "active" : ""}`}
               onClick={() => {
                 onChange(s);
                 setIsOpen(false);
+                buttonRef.current?.focus();
               }}
             >
               {getStatusIcon(s)}

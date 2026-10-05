@@ -7,7 +7,8 @@
   background-color: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
 }
 
 .problem-table {
@@ -16,9 +17,25 @@
   text-align: left;
 }
 
+.problem-table thead tr th:first-child {
+  border-top-left-radius: calc(var(--radius-md) - 1px);
+}
+
+.problem-table thead tr th:last-child {
+  border-top-right-radius: calc(var(--radius-md) - 1px);
+}
+
+.problem-table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: calc(var(--radius-md) - 1px);
+}
+
+.problem-table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: calc(var(--radius-md) - 1px);
+}
+
 .problem-table th {
   background-color: var(--bg-sidebar);
-  padding: 8px 12px;
+  padding: 10px 14px;
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
@@ -29,7 +46,7 @@
 }
 
 .problem-table td {
-  padding: 8px 12px;
+  padding: 9px 14px;
   border-bottom: 1px solid var(--border-subtle);
   vertical-align: middle;
   font-size: 13px;
@@ -40,11 +57,17 @@
 }
 
 .problem-row {
+  position: relative;
   transition: background-color var(--transition-fast);
 }
 
 .problem-row:hover {
   background-color: var(--bg-card-hover);
+}
+
+.problem-row:has(.dropdown-open),
+.problem-row.dropdown-open {
+  z-index: 30;
 }
 
 .problem-title-cell {
@@ -63,16 +86,23 @@
   border: none;
   padding: 0;
   text-align: left;
-  line-height: 1.35;
+  line-height: 1.4;
   transition: color var(--transition-fast);
 }
 
 .problem-title-link:hover {
-  color: var(--accent-text) !important;
+  color: var(--accent-text);
+}
+
+.problem-title-link:focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
 }
 
 .tags-container {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+  align-items: center;
 }
