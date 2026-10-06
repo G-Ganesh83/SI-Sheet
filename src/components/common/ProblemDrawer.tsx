@@ -209,7 +209,7 @@ export const ProblemDrawer: React.FC = () => {
             </div>
             {problem.labDates.length > 1 && (
               <p className="drawer-subnote">
-                ℹ️ Assigned across multiple lab dates; deduplicated as one unique tracking item.
+                Assigned across multiple lab dates; tracked as a single problem.
               </p>
             )}
           </div>

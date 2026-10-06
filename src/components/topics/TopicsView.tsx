@@ -102,26 +102,40 @@ export const TopicsView: React.FC = () => {
             )}
           </div>
 
-          <div className="problem-table-container">
-            <table className="problem-table">
-              <thead>
-                <tr>
-                  <th style={{ width: "130px" }}>Status</th>
-                  <th>Problem</th>
-                  <th style={{ minWidth: "160px" }}>Topics</th>
-                  <th style={{ width: "130px" }}>Lab Dates</th>
-                  <th style={{ width: "80px", textAlign: "center" }}>Revision</th>
-                  <th style={{ width: "80px", textAlign: "center" }}>Notes</th>
-                  <th style={{ width: "50px", textAlign: "right" }}>Open</th>
-                </tr>
-              </thead>
-              <tbody>
-                {topicProblems.map((problem) => (
-                  <ProblemRow key={problem.id} problem={problem} />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {topicProblems.length > 0 ? (
+            <div className="problem-table-container">
+              <table className="problem-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: "130px" }}>Status</th>
+                    <th>Problem</th>
+                    <th style={{ minWidth: "160px" }}>Topics</th>
+                    <th style={{ width: "130px" }}>Lab Dates</th>
+                    <th style={{ width: "80px", textAlign: "center" }}>Revision</th>
+                    <th style={{ width: "80px", textAlign: "center" }}>Notes</th>
+                    <th style={{ width: "50px", textAlign: "right" }}>Open</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topicProblems.map((problem) => (
+                    <ProblemRow key={problem.id} problem={problem} />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="empty-state empty-state-card">
+              <span className="empty-state-title">No problems found for this topic</span>
+              <p className="empty-state-desc">Select another topic from the catalog above.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {topicStats.length === 0 && (
+        <div className="empty-state empty-state-card">
+          <span className="empty-state-title">No algorithmic topics found</span>
+          <p className="empty-state-desc">Topics will appear once problem data is loaded.</p>
         </div>
       )}
     </div>

@@ -199,7 +199,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onRequestSignOut }) => {
           >
             Ganesh
           </a>{" "}
-          · v2.0
+          · v2.1
         </span>
       </footer>
     </aside>

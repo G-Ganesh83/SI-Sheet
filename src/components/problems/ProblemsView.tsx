@@ -105,17 +105,17 @@ export const ProblemsView: React.FC = () => {
 
   const emptyTitle =
     hasSearch && !hasActiveFilters
-      ? "No problems match your search."
+      ? "No problems match your search"
       : !hasSearch && hasActiveFilters
-      ? "No problems match these filters."
-      : "No problems match your search or filters.";
+      ? "No problems match these filters"
+      : "No problems match your search or filters";
 
   const emptyDesc =
     hasSearch && !hasActiveFilters
-      ? "Try checking your spelling or searching for a different keyword."
+      ? "Check your spelling or try searching for another keyword or topic."
       : !hasSearch && hasActiveFilters
-      ? "Try adjusting your filter criteria to find what you're looking for."
-      : "Try adjusting your search query or clearing your filter selections.";
+      ? "Try adjusting your filter selection to find what you're looking for."
+      : "Try clearing your search query or resetting your active filters.";
 
   return (
     <div className="view-container">
@@ -163,17 +163,10 @@ export const ProblemsView: React.FC = () => {
           </table>
         </div>
       ) : (
-        <div
-          className="empty-state"
-          style={{
-            backgroundColor: "var(--bg-card)",
-            border: "1px solid var(--border-subtle)",
-            borderRadius: "var(--radius-md)",
-            marginTop: 8,
-            padding: "32px 16px",
-          }}
-        >
-          <SearchX size={24} className="empty-state-icon" />
+        <div className="empty-state empty-state-card">
+          <div className="empty-state-icon-box">
+            <SearchX size={18} />
+          </div>
           <h3 className="empty-state-title">{emptyTitle}</h3>
           <p className="empty-state-desc">{emptyDesc}</p>
           <button

@@ -170,7 +170,7 @@ export const DashboardView: React.FC = () => {
           <div className="stats-row">
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                <Sparkles size={14} style={{ color: "var(--accent)" }} />
+                <Sparkles size={14} style={{ color: "var(--text-muted)" }} />
                 <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)" }}>
                   Start your DSA journey
                 </span>
@@ -361,7 +361,9 @@ export const DashboardView: React.FC = () => {
                 No active problems
               </span>
               <p className="empty-state-desc">
-                Mark any problem as <strong>In Progress</strong> to track your focus here.
+                {user
+                  ? "Mark problems as In Progress to track active solutions here."
+                  : "Sign in to track problems you're actively working on."}
               </p>
             </div>
           )}
@@ -444,12 +446,12 @@ export const DashboardView: React.FC = () => {
           ) : (
             <div className="empty-state">
               <span className="empty-state-title">
-                {user ? "You're clear — no problems marked for revision." : "No revision queue yet"}
+                {user ? "No problems marked for revision" : "Revision tracking"}
               </span>
               <p className="empty-state-desc">
                 {user
-                  ? "Check Need Revision on tricky problems to revisit them later."
-                  : "Sign in with Google to bookmark challenging problems for your interview drill list."}
+                  ? "Flag tricky problems or alternate approaches to review them here."
+                  : "Sign in to bookmark tricky problems for targeted interview review."}
               </p>
             </div>
           )}

@@ -259,5 +259,12 @@
     align-items: flex-start;
     gap: 6px;
   }
+
+  .toast-container {
+    bottom: calc(64px + env(safe-area-inset-bottom, 10px));
+    left: 12px;
+    right: 12px;
+    max-width: calc(100% - 24px);
+  }
 }
 

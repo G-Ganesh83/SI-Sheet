@@ -101,26 +101,40 @@ export const LabsView: React.FC = () => {
             )}
           </div>
 
-          <div className="problem-table-container">
-            <table className="problem-table">
-              <thead>
-                <tr>
-                  <th style={{ width: "130px" }}>Status</th>
-                  <th>Problem</th>
-                  <th style={{ minWidth: "160px" }}>Topics</th>
-                  <th style={{ width: "130px" }}>Lab Dates</th>
-                  <th style={{ width: "80px", textAlign: "center" }}>Revision</th>
-                  <th style={{ width: "80px", textAlign: "center" }}>Notes</th>
-                  <th style={{ width: "50px", textAlign: "right" }}>Open</th>
-                </tr>
-              </thead>
-              <tbody>
-                {activeLab.problems.map((problem) => (
-                  <ProblemRow key={problem.id} problem={problem} />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {activeLab.problems.length > 0 ? (
+            <div className="problem-table-container">
+              <table className="problem-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: "130px" }}>Status</th>
+                    <th>Problem</th>
+                    <th style={{ minWidth: "160px" }}>Topics</th>
+                    <th style={{ width: "130px" }}>Lab Dates</th>
+                    <th style={{ width: "80px", textAlign: "center" }}>Revision</th>
+                    <th style={{ width: "80px", textAlign: "center" }}>Notes</th>
+                    <th style={{ width: "50px", textAlign: "right" }}>Open</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {activeLab.problems.map((problem) => (
+                    <ProblemRow key={problem.id} problem={problem} />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="empty-state empty-state-card">
+              <span className="empty-state-title">No problems found for this lab session</span>
+              <p className="empty-state-desc">Select another lab session date above.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {labStats.length === 0 && (
+        <div className="empty-state empty-state-card">
+          <span className="empty-state-title">No lab sessions found</span>
+          <p className="empty-state-desc">Lab sessions will appear once problem data is loaded.</p>
         </div>
       )}
     </div>

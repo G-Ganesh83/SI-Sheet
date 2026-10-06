@@ -18,7 +18,7 @@
 }
 
 .stats-banner.banner-callout {
-  border-left: 3px solid var(--accent);
+  border-left: 3px solid var(--border-strong);
 }
 
 .stats-row {
@@ -315,6 +315,10 @@
   filter: brightness(1.06);
 }
 
+.status-badge:active {
+  transform: translateY(1px);
+}
+
 .status-badge:focus-visible {
   outline: 2px solid var(--border-strong);
   outline-offset: 1px;
@@ -381,6 +385,14 @@
 
 .status-dropdown-item:hover {
   background-color: var(--bg-card-hover);
+}
+
+[data-theme="light"] .status-dropdown-item:hover {
+  background-color: var(--bg-subtle);
+}
+
+.status-dropdown-item:active {
+  background-color: var(--bg-card);
 }
 
 .status-dropdown-item.active {
@@ -453,6 +465,10 @@
   outline-offset: 1px;
 }
 
+.topic-tag:active {
+  transform: translateY(1px);
+}
+
 .lab-date-tag {
   display: inline-flex;
   align-items: center;
@@ -474,6 +490,10 @@
   border-color: var(--border-default);
   color: var(--text-secondary);
   background-color: var(--bg-card-hover);
+}
+
+.lab-date-tag:active {
+  transform: translateY(1px);
 }
 
 .lab-date-tag:focus-visible {
@@ -506,6 +526,16 @@
   outline-offset: 1px;
 }
 
+.btn-icon:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn-icon:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .btn-notes-compact {
   display: inline-flex;
   align-items: center;
@@ -527,6 +557,10 @@
   color: var(--text-primary);
   border-color: var(--border-default);
   background-color: var(--bg-card-hover);
+}
+
+.btn-notes-compact:active {
+  transform: translateY(1px);
 }
 
 .btn-notes-compact:focus-visible {
@@ -665,6 +699,16 @@
   outline-offset: 2px;
 }
 
+.btn-primary:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .btn-secondary {
   display: inline-flex;
   align-items: center;
@@ -684,6 +728,16 @@
 .btn-secondary:hover {
   background-color: var(--bg-card-hover);
   border-color: var(--border-default);
+}
+
+.btn-secondary:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .btn-secondary:focus-visible {
@@ -857,6 +911,10 @@
 [data-theme="light"] .overview-card:hover {
   background-color: var(--bg-card-hover);
   border-color: var(--border-default);
+}
+
+.overview-card:active {
+  transform: translateY(1px);
 }
 
 .overview-card:focus-visible {

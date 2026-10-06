@@ -147,11 +147,25 @@
   align-items: center;
   justify-content: center;
   color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
 }
 
 .mobile-logout-btn:hover,
 .mobile-signin-btn:hover {
   color: var(--text-primary);
+  background-color: var(--bg-card);
+}
+
+.mobile-logout-btn:active,
+.mobile-signin-btn:active {
+  transform: translateY(1px);
+}
+
+.mobile-logout-btn:focus-visible,
+.mobile-signin-btn:focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: 1px;
 }
 
 .mobile-bottom-nav {
@@ -185,6 +199,15 @@
 
 .mobile-nav-item:hover {
   color: var(--text-secondary);
+}
+
+.mobile-nav-item:active {
+  transform: translateY(1px);
+}
+
+.mobile-nav-item:focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: -2px;
 }
 
 .mobile-nav-item.active {
