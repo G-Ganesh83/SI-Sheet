@@ -6,6 +6,7 @@ export interface AdminUser {
   role: "user" | "admin";
   created_at: string;
   last_sign_in_at: string | null;
+  last_seen_at: string | null;
   completed_count: number;
   in_progress_count: number;
   revision_count: number;

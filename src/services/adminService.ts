@@ -37,7 +37,7 @@ async function fetchAdminUsersFallback(): Promise<AdminUser[]> {
   // Query profiles (Admin has RLS select access to all profiles)
   const { data: profiles, error: profileErr } = await supabase
     .from("profiles")
-    .select("user_id, display_name, avatar_url, role, created_at")
+    .select("user_id, display_name, avatar_url, role, created_at, last_seen_at")
     .order("created_at", { ascending: false });
 
   if (profileErr) {
@@ -84,6 +84,7 @@ async function fetchAdminUsersFallback(): Promise<AdminUser[]> {
       role: (p.role as "user" | "admin") || "user",
       created_at: p.created_at,
       last_sign_in_at: null,
+      last_seen_at: p.last_seen_at || null,
       completed_count: stats.completed_count,
       in_progress_count: stats.in_progress_count,
       revision_count: stats.revision_count,

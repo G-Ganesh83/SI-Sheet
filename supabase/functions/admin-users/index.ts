@@ -32,15 +32,16 @@ serve(async (req: Request) => {
       );
     }
 
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+
     const supabaseUserClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
       auth: { persistSession: false },
     });
 
     const {
       data: { user: callingUser },
       error: authError,
-    } = await supabaseUserClient.auth.getUser();
+    } = await supabaseUserClient.auth.getUser(token);
 
     if (authError || !callingUser) {
       return new Response(
@@ -84,7 +85,7 @@ serve(async (req: Request) => {
     // 5. Fetch Profiles
     const { data: profiles, error: profilesFetchErr } = await supabaseAdmin
       .from("profiles")
-      .select("user_id, display_name, avatar_url, role, created_at");
+      .select("user_id, display_name, avatar_url, role, created_at, last_seen_at");
 
     if (profilesFetchErr) {
       return new Response(
@@ -167,6 +168,10 @@ serve(async (req: Request) => {
         typeof u.last_sign_in_at === "string" && u.last_sign_in_at.length > 0
           ? u.last_sign_in_at
           : null;
+      const lastSeenAt: string | null =
+        typeof userProf?.last_seen_at === "string" && userProf.last_seen_at.length > 0
+          ? userProf.last_seen_at
+          : null;
 
       return {
         id: u.id,
@@ -176,6 +181,7 @@ serve(async (req: Request) => {
         role,
         created_at: u.created_at,
         last_sign_in_at: lastSignInAt,
+        last_seen_at: lastSeenAt,
         completed_count: userStats.completed_count,
         in_progress_count: userStats.in_progress_count,
         revision_count: userStats.revision_count,

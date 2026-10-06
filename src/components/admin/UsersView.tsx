@@ -27,6 +27,18 @@ export const UsersView: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [currentTime, setCurrentTime] = useState<number>(() => Date.now());
+
+  // Periodically refresh relative time display approximately once per minute
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 60 * 1000);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -147,6 +159,63 @@ export const UsersView: React.FC = () => {
       });
     } catch {
       return isoString;
+    }
+  };
+
+  const formatLastActive = (
+    isoString: string | null,
+    now: number
+  ): { text: string; isRecent: boolean } => {
+    if (!isoString) return { text: "Never", isRecent: false };
+    try {
+      const timestamp = new Date(isoString).getTime();
+      if (isNaN(timestamp)) return { text: "Never", isRecent: false };
+
+      const diffMs = now - timestamp;
+      if (diffMs < 0) {
+        return { text: "Just now", isRecent: true };
+      }
+
+      const diffMins = Math.floor(diffMs / (60 * 1000));
+      const diffHours = Math.floor(diffMs / (60 * 60 * 1000));
+
+      if (diffMins < 5) {
+        return { text: "Just now", isRecent: true };
+      }
+
+      if (diffMins < 60) {
+        return { text: `${diffMins} min ago`, isRecent: false };
+      }
+
+      if (diffHours < 24) {
+        return { text: `${diffHours} hr ago`, isRecent: false };
+      }
+
+      const dateObj = new Date(timestamp);
+      const nowDate = new Date(now);
+      const yesterday = new Date(now);
+      yesterday.setDate(nowDate.getDate() - 1);
+
+      const isYesterday =
+        dateObj.getDate() === yesterday.getDate() &&
+        dateObj.getMonth() === yesterday.getMonth() &&
+        dateObj.getFullYear() === yesterday.getFullYear();
+
+      if (isYesterday) {
+        return { text: "Yesterday", isRecent: false };
+      }
+
+      const isSameYear = dateObj.getFullYear() === nowDate.getFullYear();
+      return {
+        text: dateObj.toLocaleDateString(undefined, {
+          month: "short",
+          day: "numeric",
+          ...(isSameYear ? {} : { year: "numeric" }),
+        }),
+        isRecent: false,
+      };
+    } catch {
+      return { text: isoString, isRecent: false };
     }
   };
 
@@ -300,76 +369,91 @@ export const UsersView: React.FC = () => {
                 <th className="col-stat">In Progress</th>
                 <th className="col-stat">Revision</th>
                 <th className="col-joined">Joined</th>
+                <th className="col-last-active">Last Active</th>
                 <th className="col-last-signin">Last Sign-in</th>
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map((item) => (
-                <tr key={item.id} className="admin-user-row">
-                  <td>
-                    <div className="admin-user-cell">
-                      <div className="admin-avatar">
-                        {item.avatar_url ? (
-                          <img src={item.avatar_url} alt={item.display_name || "User"} />
-                        ) : (
-                          <span>
-                            {(item.display_name || item.email || "U").charAt(0).toUpperCase()}
+              {filteredUsers.map((item) => {
+                const lastActive = formatLastActive(item.last_seen_at, currentTime);
+                return (
+                  <tr key={item.id} className="admin-user-row">
+                    <td>
+                      <div className="admin-user-cell">
+                        <div className="admin-avatar">
+                          {item.avatar_url ? (
+                            <img src={item.avatar_url} alt={item.display_name || "User"} />
+                          ) : (
+                            <span>
+                              {(item.display_name || item.email || "U").charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                        </div>
+                        <div className="admin-user-meta">
+                          <span className="admin-user-name">
+                            {item.display_name || "Anonymous Learner"}
                           </span>
-                        )}
+                          {item.email ? (
+                            <span className="admin-user-email" title={item.email}>
+                              {item.email}
+                            </span>
+                          ) : (
+                            <span className="admin-user-email-placeholder">—</span>
+                          )}
+                        </div>
                       </div>
-                      <div className="admin-user-meta">
-                        <span className="admin-user-name">
-                          {item.display_name || "Anonymous Learner"}
+                    </td>
+                    <td>
+                      {item.role === "admin" ? (
+                        <span className="admin-badge admin-badge-admin">
+                          <ShieldCheck size={11} />
+                          Admin
                         </span>
-                        {item.email ? (
-                          <span className="admin-user-email" title={item.email}>
-                            {item.email}
-                          </span>
-                        ) : (
-                          <span className="admin-user-email-placeholder">—</span>
+                      ) : (
+                        <span className="admin-badge admin-badge-user">
+                          <UserIcon size={11} />
+                          User
+                        </span>
+                      )}
+                    </td>
+                    <td style={{ textAlign: "center" }}>
+                      <span className="admin-stat-chip admin-stat-completed">
+                        <CheckCircle2 size={12} />
+                        <span className="admin-stat-num">{item.completed_count}</span>
+                      </span>
+                    </td>
+                    <td style={{ textAlign: "center" }}>
+                      <span className="admin-stat-chip admin-stat-in-progress">
+                        <Clock size={12} />
+                        <span className="admin-stat-num">{item.in_progress_count}</span>
+                      </span>
+                    </td>
+                    <td style={{ textAlign: "center" }}>
+                      <span className="admin-stat-chip admin-stat-revision">
+                        <RotateCcw size={12} />
+                        <span className="admin-stat-num">{item.revision_count}</span>
+                      </span>
+                    </td>
+                    <td>
+                      <span className="admin-date-text">{formatDate(item.created_at)}</span>
+                    </td>
+                    <td>
+                      <div
+                        className="admin-last-active-cell"
+                        title={item.last_seen_at ? formatDateTime(item.last_seen_at) : "Never"}
+                      >
+                        {lastActive.isRecent && (
+                          <span className="admin-active-dot" aria-hidden="true" />
                         )}
+                        <span className="admin-date-text">{lastActive.text}</span>
                       </div>
-                    </div>
-                  </td>
-                  <td>
-                    {item.role === "admin" ? (
-                      <span className="admin-badge admin-badge-admin">
-                        <ShieldCheck size={11} />
-                        Admin
-                      </span>
-                    ) : (
-                      <span className="admin-badge admin-badge-user">
-                        <UserIcon size={11} />
-                        User
-                      </span>
-                    )}
-                  </td>
-                  <td style={{ textAlign: "center" }}>
-                    <span className="admin-stat-chip admin-stat-completed">
-                      <CheckCircle2 size={12} />
-                      <span className="admin-stat-num">{item.completed_count}</span>
-                    </span>
-                  </td>
-                  <td style={{ textAlign: "center" }}>
-                    <span className="admin-stat-chip admin-stat-in-progress">
-                      <Clock size={12} />
-                      <span className="admin-stat-num">{item.in_progress_count}</span>
-                    </span>
-                  </td>
-                  <td style={{ textAlign: "center" }}>
-                    <span className="admin-stat-chip admin-stat-revision">
-                      <RotateCcw size={12} />
-                      <span className="admin-stat-num">{item.revision_count}</span>
-                    </span>
-                  </td>
-                  <td>
-                    <span className="admin-date-text">{formatDate(item.created_at)}</span>
-                  </td>
-                  <td>
-                    <span className="admin-date-text">{formatDateTime(item.last_sign_in_at)}</span>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td>
+                      <span className="admin-date-text">{formatDateTime(item.last_sign_in_at)}</span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

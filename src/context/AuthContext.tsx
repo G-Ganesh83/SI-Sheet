@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 import { AuthContext } from "./AuthContextBase";
 import type { AuthContextValue, UserProfile } from "../types/auth";
+
+const HEARTBEAT_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);
@@ -11,6 +13,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(() => Boolean(supabase));
   const [error, setError] = useState<string | null>(null);
   const [authPromptOpen, setAuthPromptOpen] = useState<boolean>(false);
+
+  const lastHeartbeatRef = useRef<number>(0);
+  const isHeartbeatInFlightRef = useRef<boolean>(false);
+
+  const triggerHeartbeat = useCallback(async (forced = false) => {
+    if (!supabase) return;
+    const now = Date.now();
+    if (!forced && now - lastHeartbeatRef.current < HEARTBEAT_COOLDOWN_MS) {
+      return;
+    }
+    if (isHeartbeatInFlightRef.current) {
+      return;
+    }
+
+    isHeartbeatInFlightRef.current = true;
+    try {
+      const { error: rpcErr } = await supabase.rpc("touch_user_activity");
+      if (rpcErr) {
+        if (import.meta.env.DEV) {
+          console.warn("[Auth] touch_user_activity notice:", rpcErr.message);
+        }
+      } else {
+        lastHeartbeatRef.current = Date.now();
+      }
+    } catch (err: unknown) {
+      if (import.meta.env.DEV) {
+        console.warn("[Auth] touch_user_activity exception:", err);
+      }
+    } finally {
+      isHeartbeatInFlightRef.current = false;
+    }
+  }, []);
 
   const showAuthPrompt = useCallback(() => {
     setAuthPromptOpen(true);
@@ -35,7 +69,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .maybeSingle();
 
       if (existingProfile) {
-        setProfile(existingProfile as UserProfile);
+        const userProf = existingProfile as UserProfile;
+        setProfile(userProf);
+        if (userProf.last_seen_at) {
+          const profileSeenTime = new Date(userProf.last_seen_at).getTime();
+          if (!Number.isNaN(profileSeenTime) && profileSeenTime > lastHeartbeatRef.current) {
+            lastHeartbeatRef.current = profileSeenTime;
+          }
+        }
         return;
       }
 
@@ -114,6 +155,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (newSession?.user) {
         await syncProfile(newSession.user);
       } else {
+        lastHeartbeatRef.current = 0;
         setProfile(null);
       }
       if (isMounted) {
@@ -126,6 +168,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       subscription.unsubscribe();
     };
   }, [syncProfile]);
+
+  // Activity interaction listener: only triggered by genuine user interaction, throttled to 5 minutes
+  useEffect(() => {
+    if (!user || !supabase) {
+      return;
+    }
+
+    const handleUserActivity = () => {
+      void triggerHeartbeat();
+    };
+
+    window.addEventListener("pointerdown", handleUserActivity, { passive: true });
+    window.addEventListener("keydown", handleUserActivity, { passive: true });
+
+    return () => {
+      window.removeEventListener("pointerdown", handleUserActivity);
+      window.removeEventListener("keydown", handleUserActivity);
+    };
+  }, [user, triggerHeartbeat]);
 
   const signInWithGoogle = useCallback(async () => {
     try {
@@ -162,6 +223,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setError(message);
       console.error("[Auth] Sign-out error:", err);
     } finally {
+      lastHeartbeatRef.current = 0;
       setSession(null);
       setUser(null);
       setProfile(null);
